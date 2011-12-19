@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import pygame
 import math
@@ -12,11 +12,13 @@ class Snake:
                     "links"  : 3,
                     "rechts" : 4}
 
-    def __init__(self, width, height):
+    def __init__(self, max_x, max_y):
         self.__fpsClock = pygame.time.Clock()
 
-        self._width = width
-        self._height = height
+        self.__spielfeld = [[0 for i in range(max_x)],[0 for i in range(max_y)]]
+
+        self._width = max_x * 20
+        self._height = max_y * 20
         pygame.init()
         self._screen = pygame.display.set_mode((self._width, self._height))
         self._screen.fill((0, 0, 0))
@@ -84,5 +86,5 @@ class Snake:
             self.__fpsClock.tick(30)
 
 if __name__ == '__main__':
-    a = Snake(800, 800)
+    a = Snake(80, 80)
     a.event_loop()
