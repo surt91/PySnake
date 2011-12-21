@@ -5,11 +5,7 @@ from PyQt4 import QtGui, QtCore
 import random
 import sys
 
-# TODO: orientiertes Dreieck als Kopf
-# TODO: spielfeld als rect (schwarz)
-# TODO: punktezähler
 # TODO: Menüpunkt zur Anpassung der Spielfeldgröße
-# TODO: mainwindows, und SnakeAnzeige als widget einbinden
 # TODO: Farbwähler (aus der Uhr übernehmen)
 
 class SnakeAnzeige(QtGui.QWidget):
@@ -92,11 +88,28 @@ class SnakeAnzeige(QtGui.QWidget):
         dy = self.__dF[1]
         radius = self.__radius
 
+        if self.__orientierung == self.richtungen["rechts"]:
+            point1 = QtCore.QPointF((x+1)*dx-radius, (y+1)*dy-2*radius)
+            point2 = QtCore.QPointF((x+1)*dx+radius, (y+1)*dy)
+            point3 = QtCore.QPointF((x+1)*dx-radius, (y+1)*dy+2*radius)
+        elif self.__orientierung == self.richtungen["links"]:
+            point1 = QtCore.QPointF((x+1)*dx+radius, (y+1)*dy-2*radius)
+            point2 = QtCore.QPointF((x+1)*dx-radius, (y+1)*dy)
+            point3 = QtCore.QPointF((x+1)*dx+radius, (y+1)*dy+2*radius)
+        elif self.__orientierung == self.richtungen["oben"]:
+            point1 = QtCore.QPointF((x+1)*dx+2*radius, (y+1)*dy+radius)
+            point2 = QtCore.QPointF((x+1)*dx, (y+1)*dy-radius)
+            point3 = QtCore.QPointF((x+1)*dx-2*radius, (y+1)*dy+radius)
+        elif self.__orientierung == self.richtungen["unten"]:
+            point1 = QtCore.QPointF((x+1)*dx+2*radius, (y+1)*dy-radius)
+            point2 = QtCore.QPointF((x+1)*dx, (y+1)*dy+radius)
+            point3 = QtCore.QPointF((x+1)*dx-2*radius, (y+1)*dy-radius)
+
         for i in range(len(self.__spielfeld)):
             for j in range(len(self.__spielfeld[i])):
-                if self.__spielfeld[i][j] > 0:
+                if self.__spielfeld[i][j] > 0 and (i!=x or j!=y):
                     paint.drawChord((i+1)*dx-radius, (j+1)*dy-radius, 2*radius, 2*radius, 0, 16 * 360)
-        paint.drawChord((x+1)*dx-radius*3/2, (y+1)*dy-radius*3/2, 3*radius, 3*radius, 0, 16 * 360)
+        paint.drawPolygon(point1, point2, point3)
         paint.setPen(QtGui.QColor(255,   0,   0))
         paint.setBrush(QtGui.QColor(255,   0,   0))
         paint.drawChord((self.__futter[0]+1)*dx-radius/2, (self.__futter[1]+1)*dy-radius/2, radius, radius, 0, 16 * 360)
