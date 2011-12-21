@@ -4,9 +4,12 @@
 from PyQt4 import QtGui, QtCore
 import random
 import sys
+from colorSelektor import *
 
 # TODO: Menüpunkt zur Anpassung der Spielfeldgröße
-# TODO: Farbwähler (aus der Uhr übernehmen)
+# TODO: Menüpunkt zur Anpassung der Spielgeschwindigkeit
+# TODO: Menüpunkt zum Neustarten
+# TODO: Highscore
 
 class SnakeAnzeige(QtGui.QWidget):
 
@@ -15,6 +18,9 @@ class SnakeAnzeige(QtGui.QWidget):
                     "unten"  : 2,
                     "links"  : 3,
                     "rechts" : 4}
+    farben = { "bg"       : QtGui.QColor(  0,   0,   0),
+               "futter"   : QtGui.QColor(255,   0,   0),
+               "schlange" : QtGui.QColor(  0, 255,   0) }
 
     def __init__(self):
         super().__init__()
@@ -59,6 +65,8 @@ class SnakeAnzeige(QtGui.QWidget):
 
         self.__futter = (random.randint(0,self.__maxF[0]), random.randint(0,self.__maxF[1]))
 
+        self.setColor(self.farben)
+
         self.__timer = QtCore.QTimer()
         self.__timer.timeout.connect(self.__steuern)
         self.__timer.start(300)
@@ -77,11 +85,12 @@ class SnakeAnzeige(QtGui.QWidget):
         self.malen(paint)
 
     def malen(self,paint):
-        paint.setPen(QtGui.QColor(  0,   0,   0))
-        paint.setBrush(QtGui.QColor(  0,   0,   0))
+        paint.setPen(self.__bgColor)
+        paint.setBrush(self.__bgColor)
         paint.drawRect(self.__bereich)
-        paint.setPen(QtGui.QColor(  0, 255,   0))
-        paint.setBrush(QtGui.QColor(  0, 255,   0))
+
+        paint.setPen(self.__schlangeColor)
+        paint.setBrush(self.__schlangeColor)
         x = self.__pos[0]
         y = self.__pos[1]
         dx = self.__dF[0]
@@ -110,8 +119,9 @@ class SnakeAnzeige(QtGui.QWidget):
                 if self.__spielfeld[i][j] > 0 and (i!=x or j!=y):
                     paint.drawChord((i+1)*dx-radius, (j+1)*dy-radius, 2*radius, 2*radius, 0, 16 * 360)
         paint.drawPolygon(point1, point2, point3)
-        paint.setPen(QtGui.QColor(255,   0,   0))
-        paint.setBrush(QtGui.QColor(255,   0,   0))
+
+        paint.setPen(self.__futterColor)
+        paint.setBrush(self.__futterColor)
         paint.drawChord((self.__futter[0]+1)*dx-radius/2, (self.__futter[1]+1)*dy-radius/2, radius, radius, 0, 16 * 360)
 
     def __steuern(self):
@@ -202,6 +212,14 @@ class SnakeAnzeige(QtGui.QWidget):
                     self.__block = True
                     self.__setPause(False)
 
+    def setColor(self, colors):
+        self.__bgColor          = colors["bg"]
+        self.__futterColor      = colors["futter"]
+        self.__schlangeColor    = colors["schlange"]
+
+    def getColor(self):
+        return self.farben
+
 class Snake(QtGui.QWidget):
     def __init__(self):
         super().__init__()
@@ -253,12 +271,43 @@ class SnakeWindow(QtGui.QMainWindow):
         self.setWindowTitle('Snake')
         self.setWindowIcon(QtGui.QIcon('icon.png'))
 
+        self.makeMenu()
+
         self.anzeige = Snake()
         self.setCentralWidget(self.anzeige)
         self.show()
 
     def keyPressEvent(self, event):
+        # weiterleitung der key events an das anzeige/ steuerungswidget
         self.anzeige.anzeige.keyPressEvent(event)
+
+    def makeMenu(self):
+        iconColor = QtGui.QIcon('color.png')
+        setColorAction = QtGui.QAction(iconColor, '&Farbe', self)
+        setColorAction.setShortcut('c')
+        setColorAction.setCheckable(False)
+        setColorAction.triggered.connect(self.setColor)
+
+        iconExit = QtGui.QIcon('exit.png')
+        exitAction = QtGui.QAction(iconExit, '&Exit', self)
+        exitAction.setShortcut('Ctrl+Q')
+        exitAction.setStatusTip('Exit application')
+        exitAction.triggered.connect(QtGui.qApp.quit)
+
+        menubar = QtGui.QMenuBar(self)
+        menuFkt = menubar.addMenu('Funktion')
+        menuDar = menubar.addMenu('Darstellung')
+
+        menuFkt.addAction(exitAction)
+
+        menuDar.addAction(setColorAction)
+
+        self.setMenuBar(menubar)
+
+    def setColor(self):
+        colorChooser = ColorSelektor(self.anzeige.anzeige.getColor())
+        self.connect(colorChooser, QtCore.SIGNAL('signalColorChanged'), self.anzeige.anzeige.setColor)
+        colorChooser.exec_()
 
 def main():
     app = QtGui.QApplication(sys.argv)
