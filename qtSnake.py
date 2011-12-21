@@ -113,7 +113,6 @@ class SnakeAnzeige(QtGui.QWidget):
         paint.setPen(QtGui.QColor(255,   0,   0))
         paint.setBrush(QtGui.QColor(255,   0,   0))
         paint.drawChord((self.__futter[0]+1)*dx-radius/2, (self.__futter[1]+1)*dy-radius/2, radius, radius, 0, 16 * 360)
-        self.update()
 
     def __steuern(self):
         if not self.__statusPause:
