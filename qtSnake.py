@@ -10,6 +10,7 @@ import sys
 # TODO: punktezähler
 # TODO: Menüpunkt zur Anpassung der Spielfeldgröße
 # TODO: mainwindows, und SnakeAnzeige als widget einbinden
+# TODO: Farbwähler (aus der Uhr übernehmen)
 
 class SnakeAnzeige(QtGui.QWidget):
 
@@ -33,10 +34,12 @@ class SnakeAnzeige(QtGui.QWidget):
     def __initSnake(self, maxFeld):
         # Initialisierungen
         self.__punkte = 0
+        self.__level = 3
 
         self.__maxF = maxFeld
 
-        self.__statusPause = True
+        self.__setPause(True)
+        self.__block = False
 
         self.__spielfeld = [[0 for j in range(self.__maxF[1])] for i in range(self.__maxF[0])]
 
@@ -54,7 +57,7 @@ class SnakeAnzeige(QtGui.QWidget):
 
         self.setMinimumSize(self.__size[0], self.__size[1])
 
-        self.__orientierung = "oben"
+        self.__orientierung = self.richtungen["oben"]
 
         self.__pos = startF
 
@@ -68,14 +71,11 @@ class SnakeAnzeige(QtGui.QWidget):
         self.update()
 
     def paintEvent(self, event):
-        #~ self.__size = min(self.height(), self.width())
-        #~ self.__margin = self.__size / 100
         self.__bereich = QtCore.QRect(0, 0, self.__size[0], self.__size[1])
 
         paint = QtGui.QPainter(self)
 
         paint.setBrush(QtGui.QBrush(QtCore.Qt.SolidPattern))
-        #~ paint.setFont(QtGui.QFont('Monospace', self.__size/7))
         paint.setRenderHint(QtGui.QPainter.Antialiasing)
         paint.eraseRect(self.__bereich)
         self.malen(paint)
@@ -103,25 +103,27 @@ class SnakeAnzeige(QtGui.QWidget):
         self.update()
 
     def __steuern(self):
-        for i in range(len(self.__spielfeld)):
-            for j in range(len(self.__spielfeld[i])):
-                if self.__spielfeld[i][j] > 0:
-                    self.__spielfeld[i][j] -= 1
-        if self.__orientierung == self.richtungen["oben"]:
-            self.__pos[1] -= 1
-        elif self.__orientierung == self.richtungen["unten"]:
-            self.__pos[1] += 1
-        elif self.__orientierung == self.richtungen["links"]:
-            self.__pos[0] -= 1
-        elif self.__orientierung == self.richtungen["rechts"]:
-            self.__pos[0] += 1
+        if not self.__statusPause:
+            for i in range(len(self.__spielfeld)):
+                for j in range(len(self.__spielfeld[i])):
+                    if self.__spielfeld[i][j] > 0:
+                        self.__spielfeld[i][j] -= 1
+            if self.__orientierung == self.richtungen["oben"]:
+                self.__pos[1] -= 1
+            elif self.__orientierung == self.richtungen["unten"]:
+                self.__pos[1] += 1
+            elif self.__orientierung == self.richtungen["links"]:
+                self.__pos[0] -= 1
+            elif self.__orientierung == self.richtungen["rechts"]:
+                self.__pos[0] += 1
+            self.__block = False
 
-        self.__testWand()
-        self.__testSchwanz()
-        self.__testFutter()
+            self.__testWand()
+            self.__testSchwanz()
+            self.__testFutter()
 
-        self.__spielfeld[self.__pos[0]][self.__pos[1]] = self.__length
-        self.redraw()
+            self.__spielfeld[self.__pos[0]][self.__pos[1]] = self.__length
+            self.redraw()
 
     def __testWand(self):
         for i in (0,1):
@@ -140,16 +142,20 @@ class SnakeAnzeige(QtGui.QWidget):
         if self.__pos[0] == self.__futter[0] and self.__pos[1] == self.__futter[1]:
             self.__futter = (random.randint(0,self.__maxF[0]-1), random.randint(0,self.__maxF[1]-1))
             self.__length += 1
+            self.__punkte += self.__level
+            self.emit(QtCore.SIGNAL('signalPunkt'), self.__punkte)
+
             for i in range(len(self.__spielfeld)):
                 for j in range(len(self.__spielfeld[i])):
                     if self.__spielfeld[i][j] > 0:
                         self.__spielfeld[i][j] += 1
 
-    def __pause(self):
-        if self.__statusPause:
-            self.__statusPause = False
-        else:
+    def __setPause(self, p):
+        if p:
             self.__statusPause = True
+        else:
+            self.__statusPause = False
+        self.emit(QtCore.SIGNAL('signalPause'), self.__statusPause)
 
     def __verloren(self):
         sys.exit()
@@ -160,28 +166,91 @@ class SnakeAnzeige(QtGui.QWidget):
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Escape:
             self.__ende()
-        if event.key() == QtCore.Qt.Key_Escape:
-            self.__ende()
-        elif event.key() == QtCore.Qt.Key_W:
-            if self.__orientierung != self.richtungen["unten"]:
-                self.__orientierung = self.richtungen["oben"]
-                self.__statusPause = False
-        elif event.key() == QtCore.Qt.Key_S:
-            if self.__orientierung != self.richtungen["oben"]:
-                self.__orientierung = self.richtungen["unten"]
-                self.__statusPause = False
-        elif event.key() == QtCore.Qt.Key_A:
-            if self.__orientierung != self.richtungen["rechts"]:
-                self.__orientierung = self.richtungen["links"]
-                self.__statusPause = False
-        elif event.key() == QtCore.Qt.Key_D:
-            if self.__orientierung != self.richtungen["links"]:
-                self.__orientierung = self.richtungen["rechts"]
-                self.__statusPause = False
+        if event.key() == QtCore.Qt.Key_P:
+            self.__setPause(True)
+        if not self.__block:
+            if event.key() == QtCore.Qt.Key_W:
+                if self.__orientierung != self.richtungen["unten"]:
+                    self.__orientierung = self.richtungen["oben"]
+                    self.__block = True
+                    self.__setPause(False)
+            elif event.key() == QtCore.Qt.Key_S:
+                if self.__orientierung != self.richtungen["oben"]:
+                    self.__orientierung = self.richtungen["unten"]
+                    self.__block = True
+                    self.__setPause(False)
+            elif event.key() == QtCore.Qt.Key_A:
+                if self.__orientierung != self.richtungen["rechts"]:
+                    self.__orientierung = self.richtungen["links"]
+                    self.__block = True
+                    self.__setPause(False)
+            elif event.key() == QtCore.Qt.Key_D:
+                if self.__orientierung != self.richtungen["links"]:
+                    self.__orientierung = self.richtungen["rechts"]
+                    self.__block = True
+                    self.__setPause(False)
+
+class Snake(QtGui.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.__punkte = 0
+        self.initUI()
+
+    def initUI(self):
+        self.anzeige = SnakeAnzeige()
+        self.connect(self.anzeige, QtCore.SIGNAL('signalPunkt'), self.setPunkte)
+        self.connect(self.anzeige, QtCore.SIGNAL('signalPause'), self.setPause)
+
+        self.punktAnzeige = QtGui.QLabel()
+        self.setPunkte(0)
+
+        self.pauseAnzeige = QtGui.QLabel()
+        self.setPause(True)
+
+        statusAnzeige = QtGui.QVBoxLayout()
+        statusAnzeige.addWidget(self.pauseAnzeige)
+        statusAnzeige.addWidget(self.punktAnzeige)
+        statusAnzeige.addStretch()
+
+        display = QtGui.QHBoxLayout()
+        display.addWidget(self.anzeige)
+        display.addLayout(statusAnzeige)
+
+        self.setLayout(display)
+
+        self.show()
+
+    def setPunkte(self, p):
+        self.__punkte = p
+        self.punktAnzeige.setText("Punkte: " + str(p))
+
+    def setPause(self, p):
+        self.__pause = p
+        if p:
+            self.pauseAnzeige.setText("Pause!")
+        else:
+            self.pauseAnzeige.setText("")
+
+class SnakeWindow(QtGui.QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        # Fenstereigenschaften
+        self.setWindowTitle('Snake')
+        self.setWindowIcon(QtGui.QIcon('icon.png'))
+
+        self.anzeige = Snake()
+        self.setCentralWidget(self.anzeige)
+        self.show()
+
+    def keyPressEvent(self, event):
+        self.anzeige.anzeige.keyPressEvent(event)
 
 def main():
     app = QtGui.QApplication(sys.argv)
-    ex = SnakeAnzeige()
+    ex = SnakeWindow()
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
