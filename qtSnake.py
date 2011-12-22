@@ -5,9 +5,9 @@ from PyQt4 import QtGui, QtCore
 import random
 import sys
 from colorSelektor import *
+from zahlSelektor import *
 
 # TODO: Menüpunkt zur Anpassung der Spielfeldgröße
-# TODO: Menüpunkt zur Anpassung der Spielgeschwindigkeit
 # TODO: Highscore
 
 class SnakeAnzeige(QtGui.QWidget):
@@ -36,21 +36,17 @@ class SnakeAnzeige(QtGui.QWidget):
         # Initialisierungen
         self.__maxF = maxFeld
         self.__radius = 10
+        self.__level = 3
 
         self.setColor(self.farben)
 
         self.neustart()
 
-        self.__timer = QtCore.QTimer()
-        self.__timer.timeout.connect(self.__steuern)
-        self.__timer.start(300)
-
     def neustart(self):
         self.__bVerloren = False
         self.__setPunkte(0)
-        self.__level = 3
 
-        self.__setPause(True)
+        self.setPause(True)
         self.__block = False
 
         self.__spielfeld = [[0 for j in range(self.__maxF[1])] for i in range(self.__maxF[0])]
@@ -72,6 +68,10 @@ class SnakeAnzeige(QtGui.QWidget):
         self.__pos = startF
 
         self.__futter = (random.randint(0,self.__maxF[0]), random.randint(0,self.__maxF[1]))
+
+        self.__timer = QtCore.QTimer()
+        self.__timer.timeout.connect(self.__steuern)
+        self.__timer.start(1000/self.__level/2)
 
         self.redraw()
 
@@ -160,8 +160,6 @@ class SnakeAnzeige(QtGui.QWidget):
 
     def __testSchwanz(self):
         if self.__spielfeld[self.__pos[0]][self.__pos[1]] != self.__length -1  and self.__spielfeld[self.__pos[0]][self.__pos[1]] != 0:
-            #~ print(self.__pos[0], self.__pos[1], ":", self.__spielfeld[self.__pos[0]][self.__pos[1]])
-            #~ print("Verloren")
             self.__verloren()
 
     def __testFutter(self):
@@ -182,7 +180,7 @@ class SnakeAnzeige(QtGui.QWidget):
             self.__punkte = p
         self.emit(QtCore.SIGNAL('signalPunkt'), self.__punkte)
 
-    def __setPause(self, p):
+    def setPause(self, p):
         if p:
             self.__statusPause = True
         else:
@@ -192,7 +190,7 @@ class SnakeAnzeige(QtGui.QWidget):
 
     def __verloren(self):
         self.__bVerloren = True
-        self.__setPause(True)
+        self.setPause(True)
         self.emit(QtCore.SIGNAL('signalVerloren'))
 
     def __ende(self):
@@ -202,28 +200,35 @@ class SnakeAnzeige(QtGui.QWidget):
         if event.key() == QtCore.Qt.Key_Escape:
             self.__ende()
         if event.key() == QtCore.Qt.Key_P:
-            self.__setPause(True)
+            self.setPause(True)
         if not self.__block:
             if event.key() == QtCore.Qt.Key_W:
                 if self.__orientierung != self.richtungen["unten"]:
                     self.__orientierung = self.richtungen["oben"]
                     self.__block = True
-                    self.__setPause(False)
+                    self.setPause(False)
             elif event.key() == QtCore.Qt.Key_S:
                 if self.__orientierung != self.richtungen["oben"]:
                     self.__orientierung = self.richtungen["unten"]
                     self.__block = True
-                    self.__setPause(False)
+                    self.setPause(False)
             elif event.key() == QtCore.Qt.Key_A:
                 if self.__orientierung != self.richtungen["rechts"]:
                     self.__orientierung = self.richtungen["links"]
                     self.__block = True
-                    self.__setPause(False)
+                    self.setPause(False)
             elif event.key() == QtCore.Qt.Key_D:
                 if self.__orientierung != self.richtungen["links"]:
                     self.__orientierung = self.richtungen["rechts"]
                     self.__block = True
-                    self.__setPause(False)
+                    self.setPause(False)
+
+    def setLevel(self, i):
+        print(i)
+        self.__level = i
+
+    def getLevel(self):
+        return self.__level
 
     def setColor(self, colors):
         self.__bgColor          = colors["bg"]
@@ -305,6 +310,12 @@ class SnakeWindow(QtGui.QMainWindow):
         setColorAction.setCheckable(False)
         setColorAction.triggered.connect(self.setColor)
 
+        iconLevel = QtGui.QIcon('level.png')
+        levelAction = QtGui.QAction(iconLevel, '&Level', self)
+        levelAction.setShortcut('Ctrl+L')
+        levelAction.setStatusTip('verändere Spielgeschwindigkeit')
+        levelAction.triggered.connect(self.setLevel)
+
         iconNeustart = QtGui.QIcon('neustart.png')
         neustartAction = QtGui.QAction(iconNeustart, '&neustart', self)
         neustartAction.setShortcut('Ctrl+N')
@@ -321,14 +332,22 @@ class SnakeWindow(QtGui.QMainWindow):
         menuFkt = menubar.addMenu('Funktion')
         menuDar = menubar.addMenu('Darstellung')
 
-        menuFkt.addAction(exitAction)
         menuFkt.addAction(neustartAction)
+        menuFkt.addAction(levelAction)
+        menuFkt.addAction(exitAction)
 
         menuDar.addAction(setColorAction)
 
         self.setMenuBar(menubar)
 
     def restart(self):
+        self.anzeige.anzeige.neustart()
+
+    def setLevel(self):
+        self.anzeige.anzeige.setPause(True)
+        levelChooser = ZahlSelektor(self.anzeige.anzeige.getLevel())
+        self.connect(levelChooser, QtCore.SIGNAL('signalLevelChanged'), self.anzeige.anzeige.setLevel)
+        levelChooser.exec_()
         self.anzeige.anzeige.neustart()
 
     def setColor(self):
