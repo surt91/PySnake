@@ -8,77 +8,40 @@ from colorSelektor import *
 from zahlSelektor import *
 
 # TODO: Menüpunkt zur Anpassung der Spielfeldgröße
-# TODO: Struktur verschönern: Wie das Menü auf snake zugreift
-#       Anzeige und Logik dazu trennen? ja auf jeden fall
 # TODO: Highscore
 
 class SnakeAnzeige(QtGui.QWidget):
-
-    richtungen = {  "last"   : 0,
-                    "oben"   : 1,
-                    "unten"  : 2,
-                    "links"  : 3,
-                    "rechts" : 4}
-    farben = { "bg"       : QtGui.QColor(  0,   0,   0),
-               "futter"   : QtGui.QColor(255,   0,   0),
-               "schlange" : QtGui.QColor(  0, 255,   0) }
-
-    def __init__(self):
+    def __init__(self, maxF, richtungen, farben):
         super().__init__()
-
-        maxFeld = (20, 20)
-
         self.__initUI()
-        self.__initSnake(maxFeld)
+
+        self.__maxF = maxF
+        self.richtungen = richtungen
+        self.farben = farben
+
+        self.__radius = 10
+        self.__dF = (15,15)
+        self.neustart()
+
+    def neustart(self):
+        self.__size = [i*j+self.__radius for i,j in zip(self.__maxF, self.__dF)]
+        self.setMinimumSize(self.__size[0], self.__size[1])
 
     def __initUI(self):
         self.show()
 
-    def __initSnake(self, maxFeld):
-        # Initialisierungen
-        self.__maxF = maxFeld
-        self.__radius = 10
-        self.__level = 3
-
-        self.setColor(self.farben)
-
-        self.neustart()
-
-    def neustart(self):
-        self.__bVerloren = False
-        self.__setPunkte(0)
-
-        self.setPause(True)
-        self.__block = False
-
-        self.__spielfeld = [[0 for j in range(self.__maxF[1])] for i in range(self.__maxF[0])]
-
-        startF  = [i//2 for i in self.__maxF]
-
-        self.__length = 3
-
-        self.__spielfeld[startF[0]][startF[1]] = self.__length
-
-        self.__dF = (15,15)
-
-        self.__size = [i*j+self.__radius for i,j in zip(self.__maxF, self.__dF)]
-
-        self.setMinimumSize(self.__size[0], self.__size[1])
-
-        self.__orientierung = self.richtungen["oben"]
-
-        self.__pos = startF
-
-        self.__futter = (random.randint(0,self.__maxF[0]-1), random.randint(0,self.__maxF[1]-1))
-
-        self.__timer = QtCore.QTimer()
-        self.__timer.timeout.connect(self.__steuern)
-        self.__timer.start(1000/self.__level/2)
-
-        self.redraw()
-
-    def redraw(self):
-        self.update()
+    def setPos(self, pos):
+        self.__pos = pos
+    def setOrientierung(self, o):
+        self.__orientierung = o
+    def setSpielfeld(self, f):
+        self.__spielfeld = f
+    def setFutter(self, pos):
+        self.__futter = pos
+    def setColor(self, colors):
+        self.__bgColor          = colors["bg"]
+        self.__futterColor      = colors["futter"]
+        self.__schlangeColor    = colors["schlange"]
 
     def paintEvent(self, event):
         self.__bereich = QtCore.QRect(0, 0, self.__size[0], self.__size[1])
@@ -131,6 +94,94 @@ class SnakeAnzeige(QtGui.QWidget):
         paint.setBrush(self.__futterColor)
         paint.drawChord((self.__futter[0]+1)*dx-radius/2, (self.__futter[1]+1)*dy-radius/2, radius, radius, 0, 16 * 360)
 
+class Snake(QtGui.QWidget):
+    richtungen = {  "last"   : 0,
+                    "oben"   : 1,
+                    "unten"  : 2,
+                    "links"  : 3,
+                    "rechts" : 4}
+    farben = { "bg"       : QtGui.QColor(  0,   0,   0),
+               "futter"   : QtGui.QColor(255,   0,   0),
+               "schlange" : QtGui.QColor(  0, 255,   0) }
+
+    def __init__(self):
+        super().__init__()
+        self.__punkte = 0
+        self.__maxF = (20, 20)
+
+        self.initUI()
+
+        self.__initSnake()
+
+    def initUI(self):
+        self.punktAnzeige = QtGui.QLabel()
+        self.__setPunkte(0)
+
+        self.pauseAnzeige = QtGui.QLabel()
+        self.setPause(True)
+
+        self.__initAnzeige()
+
+        statusAnzeige = QtGui.QVBoxLayout()
+        statusAnzeige.addWidget(self.pauseAnzeige)
+        statusAnzeige.addWidget(self.punktAnzeige)
+        statusAnzeige.addStretch()
+
+        display = QtGui.QHBoxLayout()
+        display.addWidget(self.anzeige)
+        display.addLayout(statusAnzeige)
+
+        self.setLayout(display)
+
+        self.show()
+
+    def __initAnzeige(self):
+        self.anzeige = SnakeAnzeige(self.__maxF, self.richtungen, self.farben)
+
+    def redraw(self):
+        self.anzeige.setColor(self.farben)
+        self.anzeige.setPos(self.__pos)
+        self.anzeige.setFutter(self.__futter)
+        self.anzeige.setOrientierung(self.__orientierung)
+        self.anzeige.setSpielfeld(self.__spielfeld)
+        self.anzeige.update()
+
+    def __initSnake(self):
+        # Initialisierungen
+        self.__level = 3
+
+        self.setColor(self.farben)
+
+        self.neustart()
+
+    def neustart(self):
+        self.__bVerloren = False
+        self.__setPunkte(0)
+
+        self.setPause(True)
+        self.__block = False
+
+        self.__spielfeld = [[0 for j in range(self.__maxF[1])] for i in range(self.__maxF[0])]
+
+        startF  = [i//2 for i in self.__maxF]
+
+        self.__length = 3
+
+        self.__spielfeld[startF[0]][startF[1]] = self.__length
+
+        self.__orientierung = self.richtungen["oben"]
+
+        self.__pos = startF
+
+        self.__futter = (random.randint(0,self.__maxF[0]-1), random.randint(0,self.__maxF[1]-1))
+
+        self.__timer = QtCore.QTimer()
+        self.__timer.timeout.connect(self.__steuern)
+        self.__timer.start(1000/self.__level/2)
+
+        self.anzeige.neustart()
+        self.redraw()
+
     def __steuern(self):
         if not self.__statusPause:
             for i in range(len(self.__spielfeld)):
@@ -167,7 +218,6 @@ class SnakeAnzeige(QtGui.QWidget):
 
     def __testFutter(self):
         if self.__pos[0] == self.__futter[0] and self.__pos[1] == self.__futter[1]:
-            #~ self.__futter = (random.randint(0,self.__maxF[0]-1), random.randint(0,self.__maxF[1]-1))
             i = self.__pos[0]
             j = self.__pos[1]
             while i == self.__pos[0] and j == self.__pos[1]:
@@ -188,20 +238,21 @@ class SnakeAnzeige(QtGui.QWidget):
             self.__punkte += p
         else:
             self.__punkte = p
-        self.emit(QtCore.SIGNAL('signalPunkt'), self.__punkte)
+        self.punktAnzeige.setText("Punkte: " + str(self.__punkte))
 
     def setPause(self, p):
         if p:
             self.__statusPause = True
+            self.pauseAnzeige.setText("Pause!")
         else:
             if not self.__bVerloren:
                 self.__statusPause = False
-        self.emit(QtCore.SIGNAL('signalPause'), self.__statusPause)
+                self.pauseAnzeige.setText("")
 
     def __verloren(self):
         self.__bVerloren = True
         self.setPause(True)
-        self.emit(QtCore.SIGNAL('signalVerloren'))
+        self.pauseAnzeige.setText("Verloren!")
 
     def __ende(self):
         sys.exit()
@@ -241,57 +292,11 @@ class SnakeAnzeige(QtGui.QWidget):
         return self.__level
 
     def setColor(self, colors):
-        self.__bgColor          = colors["bg"]
-        self.__futterColor      = colors["futter"]
-        self.__schlangeColor    = colors["schlange"]
+        self.farben = colors
+        self.anzeige.setColor(colors)
 
     def getColor(self):
         return self.farben
-
-class Snake(QtGui.QWidget):
-    def __init__(self):
-        super().__init__()
-        self.__punkte = 0
-        self.initUI()
-
-    def initUI(self):
-        self.punktAnzeige = QtGui.QLabel()
-        self.setPunkte(0)
-
-        self.pauseAnzeige = QtGui.QLabel()
-        self.setPause(True)
-
-        self.anzeige = SnakeAnzeige()
-        self.connect(self.anzeige, QtCore.SIGNAL('signalPunkt'), self.setPunkte)
-        self.connect(self.anzeige, QtCore.SIGNAL('signalPause'), self.setPause)
-        self.connect(self.anzeige, QtCore.SIGNAL('signalVerloren'), self.verloren)
-
-        statusAnzeige = QtGui.QVBoxLayout()
-        statusAnzeige.addWidget(self.pauseAnzeige)
-        statusAnzeige.addWidget(self.punktAnzeige)
-        statusAnzeige.addStretch()
-
-        display = QtGui.QHBoxLayout()
-        display.addWidget(self.anzeige)
-        display.addLayout(statusAnzeige)
-
-        self.setLayout(display)
-
-        self.show()
-
-    def verloren(self):
-        self.pauseAnzeige.setText("Verloren!")
-
-    def setPunkte(self, p):
-        self.__punkte = p
-        self.punktAnzeige.setText("Punkte: " + str(p))
-
-    def setPause(self, p):
-        self.__pause = p
-        if p:
-            self.pauseAnzeige.setText("Pause!")
-        else:
-            self.pauseAnzeige.setText("")
 
 class SnakeWindow(QtGui.QMainWindow):
     def __init__(self):
@@ -311,7 +316,7 @@ class SnakeWindow(QtGui.QMainWindow):
 
     def keyPressEvent(self, event):
         # weiterleitung der key events an das anzeige/ steuerungswidget
-        self.anzeige.anzeige.keyPressEvent(event)
+        self.anzeige.keyPressEvent(event)
 
     def makeMenu(self):
         iconColor = QtGui.QIcon('color.png')
