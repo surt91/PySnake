@@ -8,6 +8,8 @@ from colorSelektor import *
 from zahlSelektor import *
 
 # TODO: Menüpunkt zur Anpassung der Spielfeldgröße
+# TODO: Struktur verschönern: Wie das Menü auf snake zugreift
+#       Anzeige und Logik dazu trennen? ja auf jeden fall
 # TODO: Highscore
 
 class SnakeAnzeige(QtGui.QWidget):
@@ -67,7 +69,7 @@ class SnakeAnzeige(QtGui.QWidget):
 
         self.__pos = startF
 
-        self.__futter = (random.randint(0,self.__maxF[0]), random.randint(0,self.__maxF[1]))
+        self.__futter = (random.randint(0,self.__maxF[0]-1), random.randint(0,self.__maxF[1]-1))
 
         self.__timer = QtCore.QTimer()
         self.__timer.timeout.connect(self.__steuern)
@@ -101,6 +103,7 @@ class SnakeAnzeige(QtGui.QWidget):
         dy = self.__dF[1]
         radius = self.__radius
 
+        # TODO: Schönere Schleifen bauen
         if self.__orientierung == self.richtungen["rechts"]:
             point1 = QtCore.QPointF((x+1)*dx-radius, (y+1)*dy-2*radius)
             point2 = QtCore.QPointF((x+1)*dx+radius, (y+1)*dy)
@@ -164,7 +167,14 @@ class SnakeAnzeige(QtGui.QWidget):
 
     def __testFutter(self):
         if self.__pos[0] == self.__futter[0] and self.__pos[1] == self.__futter[1]:
-            self.__futter = (random.randint(0,self.__maxF[0]-1), random.randint(0,self.__maxF[1]-1))
+            #~ self.__futter = (random.randint(0,self.__maxF[0]-1), random.randint(0,self.__maxF[1]-1))
+            i = self.__pos[0]
+            j = self.__pos[1]
+            while i == self.__pos[0] and j == self.__pos[1]:
+                i = random.randint(0,self.__maxF[0]-1)
+                j = random.randint(0,self.__maxF[1]-1)
+            else:
+                self.__futter = (i,j)
             self.__length += 1
             self.__setPunkte(self.__level, add=True)
 
