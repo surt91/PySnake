@@ -285,7 +285,6 @@ class Snake(QtGui.QWidget):
                     self.setPause(False)
 
     def setLevel(self, i):
-        print(i)
         self.__level = i
 
     def getLevel(self):
@@ -359,15 +358,16 @@ class SnakeWindow(QtGui.QMainWindow):
         self.anzeige.anzeige.neustart()
 
     def setLevel(self):
-        self.anzeige.anzeige.setPause(True)
-        levelChooser = ZahlSelektor(self.anzeige.anzeige.getLevel())
-        self.connect(levelChooser, QtCore.SIGNAL('signalLevelChanged'), self.anzeige.anzeige.setLevel)
+        self.anzeige.setPause(True)
+        levelChooser = ZahlSelektor(self.anzeige.getLevel())
+        self.connect(levelChooser, QtCore.SIGNAL('signalLevelChanged'), self.anzeige.setLevel)
         levelChooser.exec_()
-        self.anzeige.anzeige.neustart()
+        self.anzeige.neustart()
 
     def setColor(self):
-        colorChooser = ColorSelektor(self.anzeige.anzeige.getColor())
-        self.connect(colorChooser, QtCore.SIGNAL('signalColorChanged'), self.anzeige.anzeige.setColor)
+        self.anzeige.setPause(True)
+        colorChooser = ColorSelektor(self.anzeige.getColor())
+        self.connect(colorChooser, QtCore.SIGNAL('signalColorChanged'), self.anzeige.setColor)
         colorChooser.exec_()
 
 def main():
