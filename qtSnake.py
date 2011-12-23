@@ -9,7 +9,6 @@ from zahlSelektor import *
 from highscore import *
 
 # TODO: Menüpunkt zur Anpassung der Spielfeldgröße
-# TODO: Highscore
 
 class SnakeAnzeige(QtGui.QWidget):
     def __init__(self, maxF, richtungen, farben):
@@ -276,7 +275,8 @@ class Snake(QtGui.QWidget):
         if CheckHighscore.getPunkte() < self.__punkte\
                         or CheckHighscore.getLength() < 10:
             hs = SetHighscore(self.__punkte, self.__level)
-            self.showHighscore()
+            hs2 = ShowHighscore()
+            hs2.exec_()
 
     def __ende(self):
         sys.exit()

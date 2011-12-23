@@ -24,7 +24,7 @@ class ShowHighscore(QtGui.QDialog):
         btn.setDefault(True)
 
         # header
-        header = ["Name", "Level", "Punkte", "Datum"]
+        header = ["#", "Name", "Level", "Punkte", "Datum"]
         for j in range(len(header)):
             grid.addWidget(QtGui.QLabel(header[j]), 0, j)
 
@@ -32,8 +32,9 @@ class ShowHighscore(QtGui.QDialog):
         n = 1
         for i in self.__getData():
             n+=1
+            grid.addWidget(QtGui.QLabel("{:2d}. ".format(n-1)), n, 0)
             for j in range(len(i)):
-                grid.addWidget(QtGui.QLabel(i[j]), n, j)
+                grid.addWidget(QtGui.QLabel(i[j]), n, j+1)
 
         # footer
         grid.addWidget(btn, n+1, len(header))
@@ -118,7 +119,7 @@ class SetHighscore(QtGui.QDialog):
                                         t.tm_hour, t.tm_min)
 
     def __makeString(self, name, punkte, level, datum):
-        return "{};{};{};{}".format(name, level, punkte, datum)
+        return "{};{};{};{}\n".format(name, level, punkte, datum)
 
     def __saveHS(self, string):
         try:
@@ -140,7 +141,7 @@ class SetHighscore(QtGui.QDialog):
 
         outputString = ""
         for i in out:
-            outputString += i + "\n"
+            outputString += i
 
         outfile = open(self.hsFileName, "w")
         outfile.write(outputString)
