@@ -258,7 +258,7 @@ class Snake(QtGui.QWidget):
             self.__punkte += p
         else:
             self.__punkte = p
-        self.punktAnzeige.setText("Punkte: " + str(self.__punkte))
+        self.punktAnzeige.setText("Punkte: " + "{:04d}".format(self.__punkte))
 
     def setPause(self, p):
         if p:
