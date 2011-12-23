@@ -273,6 +273,10 @@ class Snake(QtGui.QWidget):
         self.__bVerloren = True
         self.setPause(True)
         self.pauseAnzeige.setText("Verloren!")
+        if CheckHighscore.getPunkte() < self.__punkte\
+                        or CheckHighscore.getLength() < 10:
+            hs = SetHighscore(self.__punkte, self.__level)
+            self.showHighscore()
 
     def __ende(self):
         sys.exit()
