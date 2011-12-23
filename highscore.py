@@ -17,6 +17,9 @@ class ShowHighscore(QtGui.QDialog):
         grid = QtGui.QGridLayout()
         liste = []
 
+        self.setWindowTitle('Highscores')
+        self.setWindowIcon(QtGui.QIcon('highscore.png'))
+
         btn = QtGui.QPushButton('&Schließen!', self)
         btn.clicked.connect(self.close)
         btn.setToolTip('Klicke hier um dieses Fenster zu schließen')
@@ -74,7 +77,14 @@ class SetHighscore(QtGui.QDialog):
         self.initUI()
 
     def initUI(self):
+        self.setWindowTitle('Highscores')
+        self.setWindowIcon(QtGui.QIcon('highscore.png'))
+
         self.__nameInput = QtGui.QLineEdit()
+        label =  QtGui.QLabel()
+        label.setText("Neuer Highscore: " \
+                                    + str(self.punkte) + " Punkten\n" \
+                                    + "Trage hier deinen Namen ein.")
 
         btn = QtGui.QPushButton('&Abschicken!', self)
         btn.clicked.connect(self.__abschicken)
@@ -86,7 +96,11 @@ class SetHighscore(QtGui.QDialog):
         hbox.addWidget(self.__nameInput)
         hbox.addWidget(btn)
 
-        self.setLayout(hbox)
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(label)
+        vbox.addLayout(hbox)
+
+        self.setLayout(vbox)
 
         self.exec_()
 
@@ -115,7 +129,7 @@ class SetHighscore(QtGui.QDialog):
 
     def __getDatum(self):
         t = time.localtime()
-        return "{}-{}-{}T{}:{}".format(t.tm_year, t.tm_mon, t.tm_mday,\
+        return "{}-{:02d}-{:02d}T{:02d}:{:02d}".format(t.tm_year, t.tm_mon, t.tm_mday,\
                                         t.tm_hour, t.tm_min)
 
     def __makeString(self, name, punkte, level, datum):
@@ -177,6 +191,4 @@ class CheckHighscore():
         for i in range(len(out)):
             if out[i].strip() == "":
                 del out[i]
-            #~ else:
-                #~ out[i] = int(out[i].strip().split(";")[2])
         return len(out)
