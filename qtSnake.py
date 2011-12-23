@@ -111,7 +111,6 @@ class SnakeAnzeige(QtGui.QWidget):
         point3 = QtCore.QPointF((x+1)*dx+a[2], (y+1)*dy+b[2])
         paint.drawPolygon(point1, point2, point3)
 
-
 class Snake(QtGui.QWidget):
     richtungen = {  "last"   : 0,
                     "oben"   : 1,

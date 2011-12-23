@@ -26,6 +26,7 @@ class ZahlSelektor(QtGui.QDialog):
         btn.clicked.connect(self.__sendVal)
         btn.setToolTip('Klicke hier um die neues Level abzuschicken')
         btn.setMaximumSize(btn.sizeHint())
+        btn.setDefault(True)
 
         vbox1 = QtGui.QVBoxLayout()
         vbox1.addWidget(lcd)
@@ -42,8 +43,6 @@ class ZahlSelektor(QtGui.QDialog):
         self.setLayout(hbox)
 
         self.setWindowTitle('Level Auswahl')
-
-        self.show()
 
     def __setVal(self, x):
         self.__wert = x

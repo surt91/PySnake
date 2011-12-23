@@ -45,6 +45,7 @@ class ColorSelektor(QtGui.QDialog):
         btn.clicked.connect(self.__sendVal)
         btn.setToolTip('Klicke hier um die neuen Farben abzuschicken')
         btn.setMaximumSize(btn.sizeHint())
+        btn.setDefault(True)
 
         vbox1 = QtGui.QVBoxLayout()
         vbox1.addLayout(hboxBG)
@@ -62,8 +63,6 @@ class ColorSelektor(QtGui.QDialog):
         self.setLayout(hbox)
 
         self.setWindowTitle('Farb Auswahl')
-
-        self.show()
 
     def makeIcon(self, color, button):
         x = QtGui.QPixmap(100,100)
