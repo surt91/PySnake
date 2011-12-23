@@ -66,33 +66,53 @@ class SnakeAnzeige(QtGui.QWidget):
         dy = self.__dF[1]
         radius = self.__radius
 
-        # TODO: Schönere Schleifen bauen
-        if self.__orientierung == self.richtungen["rechts"]:
-            point1 = QtCore.QPointF((x+1)*dx-radius, (y+1)*dy-2*radius)
-            point2 = QtCore.QPointF((x+1)*dx+radius, (y+1)*dy)
-            point3 = QtCore.QPointF((x+1)*dx-radius, (y+1)*dy+2*radius)
-        elif self.__orientierung == self.richtungen["links"]:
-            point1 = QtCore.QPointF((x+1)*dx+radius, (y+1)*dy-2*radius)
-            point2 = QtCore.QPointF((x+1)*dx-radius, (y+1)*dy)
-            point3 = QtCore.QPointF((x+1)*dx+radius, (y+1)*dy+2*radius)
-        elif self.__orientierung == self.richtungen["oben"]:
-            point1 = QtCore.QPointF((x+1)*dx+2*radius, (y+1)*dy+radius)
-            point2 = QtCore.QPointF((x+1)*dx, (y+1)*dy-radius)
-            point3 = QtCore.QPointF((x+1)*dx-2*radius, (y+1)*dy+radius)
-        elif self.__orientierung == self.richtungen["unten"]:
-            point1 = QtCore.QPointF((x+1)*dx+2*radius, (y+1)*dy-radius)
-            point2 = QtCore.QPointF((x+1)*dx, (y+1)*dy+radius)
-            point3 = QtCore.QPointF((x+1)*dx-2*radius, (y+1)*dy-radius)
-
         for i in range(len(self.__spielfeld)):
             for j in range(len(self.__spielfeld[i])):
                 if self.__spielfeld[i][j] > 0 and (i!=x or j!=y):
-                    paint.drawChord((i+1)*dx-radius, (j+1)*dy-radius, 2*radius, 2*radius, 0, 16 * 360)
-        paint.drawPolygon(point1, point2, point3)
+                    self.__malQuadrat(paint, i, j, radius)
+        self.__malDreieck(paint, x, y, radius, self.__orientierung)
 
         paint.setPen(self.__futterColor)
         paint.setBrush(self.__futterColor)
-        paint.drawChord((self.__futter[0]+1)*dx-radius/2, (self.__futter[1]+1)*dy-radius/2, radius, radius, 0, 16 * 360)
+        self.__malKreis(paint, self.__futter[0], self.__futter[1], radius/2)
+
+    def __malKreis(self, paint, x, y, r):
+        """zeichnet einen Kreis um x,y mit Radius r auf paint"""
+        dx = self.__dF[0]
+        dy = self.__dF[1]
+        paint.drawChord((x+1)*dx-r, (y+1)*dy-r, 2*r, 2*r, 0, 16 * 360)
+
+    def __malQuadrat(self, paint, x, y, a):
+        """zeichnet ein Quadrat um x,y mit Seitenlänge a auf paint"""
+        dx = self.__dF[0]
+        dy = self.__dF[1]
+        paint.drawRect((x+1)*dx-a/2, (y+1)*dy-a/2, a, a)
+
+    def __malDreieck(self, paint, x, y, h, richtung):
+        """zeichnet ein gleichseitiges Dreieck um x,y mit Höhe h und
+        Grundseite g = 2*h, dessen Spitze nach richtung zeigt"""
+        dx = self.__dF[0]
+        dy = self.__dF[1]
+
+        # Code für rechts
+        a = [-h,  h, -h]
+        b = [-h,  0,  h]
+
+        if richtung == self.richtungen["rechts"]:
+            pass
+        elif richtung == self.richtungen["links"]:
+            a = [-i for i in a]
+        elif richtung == self.richtungen["oben"]:
+            a, b = b, a
+            b = [-i for i in b]
+        elif richtung == self.richtungen["unten"]:
+            a, b = b, a
+
+        point1 = QtCore.QPointF((x+1)*dx+a[0], (y+1)*dy+b[0])
+        point2 = QtCore.QPointF((x+1)*dx+a[1], (y+1)*dy+b[1])
+        point3 = QtCore.QPointF((x+1)*dx+a[2], (y+1)*dy+b[2])
+        paint.drawPolygon(point1, point2, point3)
+
 
 class Snake(QtGui.QWidget):
     richtungen = {  "last"   : 0,
