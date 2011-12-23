@@ -62,8 +62,6 @@ class SnakeAnzeige(QtGui.QWidget):
         paint.setBrush(self.__schlangeColor)
         x = self.__pos[0]
         y = self.__pos[1]
-        dx = self.__dF[0]
-        dy = self.__dF[1]
         radius = self.__radius
 
         for i in range(len(self.__spielfeld)):
@@ -238,13 +236,7 @@ class Snake(QtGui.QWidget):
 
     def __testFutter(self):
         if self.__pos[0] == self.__futter[0] and self.__pos[1] == self.__futter[1]:
-            i = self.__pos[0]
-            j = self.__pos[1]
-            while i == self.__pos[0] and j == self.__pos[1]:
-                i = random.randint(0,self.__maxF[0]-1)
-                j = random.randint(0,self.__maxF[1]-1)
-            else:
-                self.__futter = (i,j)
+            self.__genFutter()
             self.__length += 1
             self.__setPunkte(self.__level, add=True)
 
@@ -252,6 +244,14 @@ class Snake(QtGui.QWidget):
                 for j in range(len(self.__spielfeld[i])):
                     if self.__spielfeld[i][j] > 0:
                         self.__spielfeld[i][j] += 1
+
+    def __genFutter(self):
+        while True:
+            i = random.randint(0,self.__maxF[0]-1)
+            j = random.randint(0,self.__maxF[1]-1)
+            if self.__spielfeld[i][j] == 0:
+                break
+        self.__futter = (i,j)
 
     def __setPunkte(self, p, add = False):
         if add:
