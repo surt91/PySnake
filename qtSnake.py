@@ -6,6 +6,7 @@ import random
 import sys
 from colorSelektor import *
 from zahlSelektor import *
+from highscore import *
 
 # TODO: Menüpunkt zur Anpassung der Spielfeldgröße
 # TODO: Highscore
@@ -355,6 +356,12 @@ class SnakeWindow(QtGui.QMainWindow):
         neustartAction.setStatusTip('beginne neue Runde')
         neustartAction.triggered.connect(self.restart)
 
+        iconShowHighscore = QtGui.QIcon('showHighscore.png')
+        showHighscoreAction = QtGui.QAction(iconShowHighscore, '&Highscore', self)
+        showHighscoreAction.setShortcut('Ctrl+H')
+        showHighscoreAction.setStatusTip('Highscore anzeigen')
+        showHighscoreAction.triggered.connect(self.showHighscore)
+
         iconExit = QtGui.QIcon('exit.png')
         exitAction = QtGui.QAction(iconExit, '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -367,6 +374,7 @@ class SnakeWindow(QtGui.QMainWindow):
 
         menuFkt.addAction(neustartAction)
         menuFkt.addAction(levelAction)
+        menuFkt.addAction(showHighscoreAction)
         menuFkt.addAction(exitAction)
 
         menuDar.addAction(setColorAction)
@@ -388,6 +396,11 @@ class SnakeWindow(QtGui.QMainWindow):
         colorChooser = ColorSelektor(self.anzeige.getColor())
         self.connect(colorChooser, QtCore.SIGNAL('signalColorChanged'), self.anzeige.setColor)
         colorChooser.exec_()
+
+    def showHighscore(self):
+        self.anzeige.setPause(True)
+        hs = ShowHighscore()
+        hs.exec_()
 
 def main():
     app = QtGui.QApplication(sys.argv)
