@@ -375,7 +375,7 @@ class SnakeWindow(QtGui.QMainWindow):
         self.setMenuBar(menubar)
 
     def restart(self):
-        self.anzeige.anzeige.neustart()
+        self.anzeige.neustart()
 
     def setLevel(self):
         self.anzeige.setPause(True)
