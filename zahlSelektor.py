@@ -50,3 +50,53 @@ class ZahlSelektor(QtGui.QDialog):
     def __sendVal(self):
         self.emit(QtCore.SIGNAL('signalLevelChanged'), self.__wert)
         self.close()
+
+class ZweiZahlSelektor(ZahlSelektor):
+    def initUI(self, default):
+        lcdX = QtGui.QLCDNumber(self)
+        sldX = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+        sldX.setRange(2,100)
+        sldX.setTracking(True)
+
+        lcdY = QtGui.QLCDNumber(self)
+        sldY = QtGui.QSlider(QtCore.Qt.Vertical, self)
+        sldY.setRange(2,100)
+        sldY.setTracking(True)
+
+        sldX.valueChanged.connect(lcdX.display)
+        sldX.valueChanged.connect(self.__setValX)
+        sldY.valueChanged.connect(lcdY.display)
+        sldY.valueChanged.connect(self.__setValY)
+
+        sldX.setValue(default[0])
+        sldY.setValue(default[1])
+        self.__wert = default
+
+        btn = QtGui.QPushButton('&Setzen!', self)
+        btn.clicked.connect(self.__sendVal)
+        btn.setToolTip('Klicke hier um die neue Größe abzuschicken')
+        btn.setMaximumSize(btn.sizeHint())
+        btn.setDefault(True)
+
+        grid = QtGui.QGridLayout()
+        grid.addWidget(lcdX, 1, 2)
+        grid.addWidget(sldX, 1, 2)
+
+        grid.addWidget(lcdY, 2, 1)
+        grid.addWidget(sldY, 2, 1)
+
+        grid.addWidget(btn, 2, 3)
+
+        self.setLayout(grid)
+
+        self.setWindowTitle('Größen Auswahl')
+
+    def __setValX(self, x):
+        self.__wertX = x
+    def __setValY(self, y):
+        self.__wertY = y
+
+    def __sendVal(self):
+        self.emit(QtCore.SIGNAL('signalSizeChanged'), (self.__wertX, self.__wertY))
+        self.close()
+

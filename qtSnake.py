@@ -34,6 +34,8 @@ class SnakeAnzeige(QtGui.QWidget):
         self.__pos = pos
     def setOrientierung(self, o):
         self.__orientierung = o
+    def setMaxF(self, f):
+        self.__maxF = f
     def setSpielfeld(self, f):
         self.__spielfeld = f
     def setFutter(self, pos):
@@ -178,6 +180,8 @@ class Snake(QtGui.QWidget):
         self.setPause(True)
         self.__block = False
 
+        self.anzeige.setMaxF(self.__maxF)
+
         self.__spielfeld = [[0 for j in range(self.__maxF[1])] for i in range(self.__maxF[0])]
 
         startF  = [i//2 for i in self.__maxF]
@@ -274,7 +278,7 @@ class Snake(QtGui.QWidget):
         self.pauseAnzeige.setText("Verloren!")
         if CheckHighscore.getPunkte() < self.__punkte\
                         or CheckHighscore.getLength() < 10:
-            hs = SetHighscore(self.__punkte, self.__level)
+            hs = SetHighscore(self.__punkte, self.__level, self.__maxF)
             hs2 = ShowHighscore()
             hs2.exec_()
 
@@ -313,6 +317,12 @@ class Snake(QtGui.QWidget):
 
     def getLevel(self):
         return self.__level
+
+    def setSize(self, i):
+        self.__maxF = i
+
+    def getSize(self):
+        return self.__maxF
 
     def setColor(self, colors):
         self.farben = colors
@@ -354,6 +364,12 @@ class SnakeWindow(QtGui.QMainWindow):
         levelAction.setStatusTip('verändere Spielgeschwindigkeit')
         levelAction.triggered.connect(self.setLevel)
 
+        iconSize = QtGui.QIcon('size.png')
+        sizeAction = QtGui.QAction(iconSize, '&Size', self)
+        #~ sizeAction.setShortcut('Ctrl+L')
+        sizeAction.setStatusTip('verändere Spielgeschwindigkeit')
+        sizeAction.triggered.connect(self.setSize)
+
         iconNeustart = QtGui.QIcon('neustart.png')
         neustartAction = QtGui.QAction(iconNeustart, '&neustart', self)
         neustartAction.setShortcut('Ctrl+N')
@@ -378,6 +394,7 @@ class SnakeWindow(QtGui.QMainWindow):
 
         menuFkt.addAction(neustartAction)
         menuFkt.addAction(levelAction)
+        menuFkt.addAction(sizeAction)
         menuFkt.addAction(showHighscoreAction)
         menuFkt.addAction(exitAction)
 
@@ -393,6 +410,13 @@ class SnakeWindow(QtGui.QMainWindow):
         levelChooser = ZahlSelektor(self.anzeige.getLevel())
         self.connect(levelChooser, QtCore.SIGNAL('signalLevelChanged'), self.anzeige.setLevel)
         levelChooser.exec_()
+        self.anzeige.neustart()
+
+    def setSize(self):
+        self.anzeige.setPause(True)
+        sizeChooser = ZweiZahlSelektor(self.anzeige.getSize())
+        self.connect(sizeChooser, QtCore.SIGNAL('signalSizeChanged'), self.anzeige.setSize)
+        sizeChooser.exec_()
         self.anzeige.neustart()
 
     def setColor(self):

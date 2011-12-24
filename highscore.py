@@ -65,12 +65,13 @@ class ShowHighscore(QtGui.QDialog):
         return "{} am {}.{}.{}".format(zeit, tag, monat, jahr)
 
 class SetHighscore(QtGui.QDialog):
-    def __init__(self, punkte, level):
+    def __init__(self, punkte, level, size):
         super().__init__()
 
         self.hsFileName = os.path.expanduser("~/.qtPySnake")
 
         self.level = level
+        self.size = size
         self.punkte = punkte
         self.datum = self.__getDatum()
 
@@ -106,7 +107,8 @@ class SetHighscore(QtGui.QDialog):
 
     def __abschicken(self):
         name = self.__checkString(self.__getTextFromNameInput())
-        out = self.__makeString(name, self.punkte, self.level, self.datum)
+        level = self.__makeLevel(self.level, self.size)
+        out = self.__makeString(name, self.punkte, level, self.datum)
         self.__saveHS(out)
         self.close()
 
@@ -131,6 +133,9 @@ class SetHighscore(QtGui.QDialog):
         t = time.localtime()
         return "{}-{:02d}-{:02d}T{:02d}:{:02d}".format(t.tm_year, t.tm_mon, t.tm_mday,\
                                         t.tm_hour, t.tm_min)
+
+    def __makeLevel(self, level, size):
+        return "{}>{}x{}".format(level, size[0], size[1])
 
     def __makeString(self, name, punkte, level, datum):
         return "{};{};{};{}\n".format(name, level, punkte, datum)
