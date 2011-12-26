@@ -64,6 +64,7 @@ class ShowHighscore(QtGui.QDialog):
         jahr, monat, tag = datum.split("-")
         return "{} am {}.{}.{}".format(zeit, tag, monat, jahr)
 
+# TODO: Default namen unter Windows testen
 class SetHighscore(QtGui.QDialog):
     def __init__(self, punkte, level, size):
         super().__init__()
@@ -81,11 +82,17 @@ class SetHighscore(QtGui.QDialog):
         self.setWindowTitle('Highscores')
         self.setWindowIcon(QtGui.QIcon('highscore.png'))
 
+        try:
+            newString = os.environ['USER']
+        except:
+            newString = "Dein Name"
+
         self.__nameInput = QtGui.QLineEdit()
+        self.__nameInput.setPlaceholderText(newString)
+        self.__nameInput.setFocus()
         label =  QtGui.QLabel()
         label.setText("Neuer Highscore: " \
-                                    + str(self.punkte) + " Punkten\n" \
-                                    + "Trage hier deinen Namen ein.")
+                                    + str(self.punkte) + " Punkten\n")
 
         btn = QtGui.QPushButton('&Abschicken!', self)
         btn.clicked.connect(self.__abschicken)
@@ -126,7 +133,10 @@ class SetHighscore(QtGui.QDialog):
             if a in alphanumeric:
                 newString += a
         if newString == "":
-            newString = "default"
+            try:
+                newString = os.environ['USER']
+            except:
+                newString = "default"
         return newString
 
     def __getDatum(self):
