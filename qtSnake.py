@@ -8,7 +8,8 @@ from colorSelektor import *
 from zahlSelektor import *
 from highscore import *
 
-# TODO: Menüpunkt zur Anpassung der Spielfeldgröße
+# TODO: FIX: Futter entsteht unter dem Kopf
+# TODO: Autopilot
 
 class SnakeAnzeige(QtGui.QWidget):
     def __init__(self, maxF, richtungen, farben):
@@ -194,7 +195,7 @@ class Snake(QtGui.QWidget):
 
         self.__pos = startF
 
-        self.__futter = (random.randint(0,self.__maxF[0]-1), random.randint(0,self.__maxF[1]-1))
+        self.__genFutter()
 
         self.__timer = QtCore.QTimer()
         self.__timer.timeout.connect(self.__steuern)
@@ -219,12 +220,22 @@ class Snake(QtGui.QWidget):
                 self.__pos[0] += 1
             self.__block = False
 
+            self.__testFeldVoll()
             self.__testWand()
             self.__testSchwanz()
             self.__testFutter()
 
             self.__spielfeld[self.__pos[0]][self.__pos[1]] = self.__length
             self.redraw()
+
+    def __testFeldVoll(self):
+        n=0
+        for i in range(len(self.__spielfeld)):
+                for j in range(len(self.__spielfeld[i])):
+                    if self.__spielfeld[i][j] == 0:
+                        n += 1
+        if n <= 2:
+            self.__verloren()
 
     def __testWand(self):
         for i in (0,1):
@@ -252,7 +263,7 @@ class Snake(QtGui.QWidget):
         while True:
             i = random.randint(0,self.__maxF[0]-1)
             j = random.randint(0,self.__maxF[1]-1)
-            if self.__spielfeld[i][j] == 0:
+            if self.__spielfeld[i][j] == 0 and self.__pos != [i,j]:
                 break
         self.__futter = (i,j)
 
