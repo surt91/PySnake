@@ -20,6 +20,7 @@ class Snake(QtGui.QWidget):
     def __init__(self):
         super().__init__()
         self.__punkte = 0
+        self.__pAutopilot = False
         self.__maxF = (20, 20)
 
         self.initUI()
@@ -68,11 +69,14 @@ class Snake(QtGui.QWidget):
         self.neustart()
 
     def neustart(self):
-        self.__pAutopilot = False
+        if self.__pAutopilot:
+            self.setPause(False)
+        else:
+            self.setPause(True)
+
         self.__bVerloren = False
         self.__setPunkte(0)
 
-        self.setPause(True)
         self.__block = False
 
         self.anzeige.setMaxF(self.__maxF)
@@ -188,20 +192,24 @@ class Snake(QtGui.QWidget):
                 self.pauseAnzeige.setText("")
 
     def __verloren(self):
-        self.__bVerloren = True
-        self.setPause(True)
-        try:
-            name = os.environ['USER']
-        except:
-            newString = "Anon"
         if self.__pAutopilot:
-            name = "bot"
-        self.pauseAnzeige.setText("Verloren!")
-        if CheckHighscore.getPunkte() < self.__punkte\
-                                    or CheckHighscore.getLength() < 10:
-            hs = SetHighscore(self.__punkte, self.__level, self.__maxF, name)
-            hs2 = ShowHighscore()
-            hs2.exec_()
+            self.__timer = QtCore.QTimer()
+            self.__timer.timeout.connect(self.neustart)
+            self.__timer.start(5000)
+        else:
+            self.__bVerloren = True
+            self.setPause(True)
+            try:
+                name = os.environ['USER']
+            except:
+                newString = "Anon"
+
+            self.pauseAnzeige.setText("Verloren!")
+            if CheckHighscore.getPunkte() < self.__punkte\
+                                        or CheckHighscore.getLength() < 10:
+                hs = SetHighscore(self.__punkte, self.__level, self.__maxF, name)
+                hs2 = ShowHighscore()
+                hs2.exec_()
 
     def __ende(self):
         sys.exit()
@@ -257,18 +265,20 @@ class Snake(QtGui.QWidget):
             self.__pAutopilot = False
         else:
             self.__pAutopilot = True
+        self.neustart()
 
     def autopilot(self):
         wunsch = [0,0,0,0]
 
         x = self.__futter[0] - self.__pos[0]
         y = self.__futter[1] - self.__pos[1]
+        m = max(self.__maxF[0],self.__maxF[1])
 
-        l = abs(x) if x < 0 else abs(self.__maxF[0] - abs(x))
-        r = abs(x) if x > 0 else abs(self.__maxF[0] - abs(x))
+        l = abs(x) if x < 0 else abs(m - abs(x))
+        r = abs(x) if x > 0 else abs(m - abs(x))
 
-        o = abs(y) if y < 0 else abs(self.__maxF[1] - abs(y))
-        u = abs(y) if y > 0 else abs(self.__maxF[1] - abs(y))
+        o = abs(y) if y < 0 else abs(m - abs(y))
+        u = abs(y) if y > 0 else abs(m - abs(y))
 
         gewichte = [("links",l),("rechts",r),("oben",o),("unten",u)]
         g = [gewichte[i][1] for i in range(len(gewichte))]
