@@ -9,7 +9,7 @@ from colorSelektor import *
 from zahlSelektor import *
 from highscore import *
 
-# TODO: Autopilot
+# TODO: Menüpuznkt wieviel Futter erzeugt werden soll
 class SnakeWindow(QtGui.QMainWindow):
     def __init__(self):
         super().__init__()
@@ -61,6 +61,13 @@ class SnakeWindow(QtGui.QMainWindow):
         showHighscoreAction.setStatusTip('Highscore anzeigen')
         showHighscoreAction.triggered.connect(self.showHighscore)
 
+        iconAutopilot = QtGui.QIcon('autopilot.png')
+        autopilotAction = QtGui.QAction(iconAutopilot, '&Autopilot', self)
+        autopilotAction.setShortcut('Ctrl+A')
+        autopilotAction.setStatusTip('Autopilot aktivieren')
+        autopilotAction.setCheckable(True)
+        autopilotAction.triggered.connect(self.toggleAutopilot)
+
         iconExit = QtGui.QIcon('exit.png')
         exitAction = QtGui.QAction(iconExit, '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -75,6 +82,7 @@ class SnakeWindow(QtGui.QMainWindow):
         menuFkt.addAction(levelAction)
         menuFkt.addAction(sizeAction)
         menuFkt.addAction(showHighscoreAction)
+        menuFkt.addAction(autopilotAction)
         menuFkt.addAction(exitAction)
 
         menuDar.addAction(setColorAction)
@@ -108,6 +116,9 @@ class SnakeWindow(QtGui.QMainWindow):
         self.anzeige.setPause(True)
         hs = ShowHighscore()
         hs.exec_()
+
+    def toggleAutopilot(self):
+        self.anzeige.toggleAutopilot()
 
 def main():
     app = QtGui.QApplication(sys.argv)

@@ -3,6 +3,7 @@
 
 from PyQt4 import QtGui, QtCore
 import random
+import os
 from snakeAnzeige import *
 from highscore import *
 
@@ -67,6 +68,7 @@ class Snake(QtGui.QWidget):
         self.neustart()
 
     def neustart(self):
+        self.__pAutopilot = False
         self.__bVerloren = False
         self.__setPunkte(0)
 
@@ -102,6 +104,10 @@ class Snake(QtGui.QWidget):
                 for j in range(len(self.__spielfeld[i])):
                     if self.__spielfeld[i][j] > 0:
                         self.__spielfeld[i][j] -= 1
+
+            if self.__pAutopilot:
+                self.autopilot()
+
             if self.__orientierung == self.richtungen["oben"]:
                 self.__pos[1] -= 1
             elif self.__orientierung == self.richtungen["unten"]:
@@ -166,6 +172,12 @@ class Snake(QtGui.QWidget):
             self.__punkte = p
         self.punktAnzeige.setText("Punkte: " + "{:04d}".format(self.__punkte))
 
+    def togglePause(self):
+        if self.__statusPause:
+            self.setPause(False)
+        else:
+            self.setPause(True)
+
     def setPause(self, p):
         if p:
             self.__statusPause = True
@@ -178,10 +190,16 @@ class Snake(QtGui.QWidget):
     def __verloren(self):
         self.__bVerloren = True
         self.setPause(True)
+        try:
+            name = os.environ['USER']
+        except:
+            newString = "Anon"
+        if self.__pAutopilot:
+            name = "bot"
         self.pauseAnzeige.setText("Verloren!")
         if CheckHighscore.getPunkte() < self.__punkte\
                                     or CheckHighscore.getLength() < 10:
-            hs = SetHighscore(self.__punkte, self.__level, self.__maxF)
+            hs = SetHighscore(self.__punkte, self.__level, self.__maxF, name)
             hs2 = ShowHighscore()
             hs2.exec_()
 
@@ -192,7 +210,7 @@ class Snake(QtGui.QWidget):
         if event.key() == QtCore.Qt.Key_Escape:
             self.__ende()
         if event.key() == QtCore.Qt.Key_P:
-            self.setPause(True)
+            self.togglePause()
         if not self.__block:
             if event.key() == QtCore.Qt.Key_W:
                 if self.__orientierung != self.richtungen["unten"]:
@@ -233,3 +251,63 @@ class Snake(QtGui.QWidget):
 
     def getColor(self):
         return self.farben
+
+    def toggleAutopilot(self):
+        if self.__pAutopilot:
+            self.__pAutopilot = False
+        else:
+            self.__pAutopilot = True
+
+    def autopilot(self):
+        wunsch = [0,0,0,0]
+
+        x = self.__futter[0] - self.__pos[0]
+        y = self.__futter[1] - self.__pos[1]
+
+        l = abs(x) if x < 0 else abs(self.__maxF[0] - abs(x))
+        r = abs(x) if x > 0 else abs(self.__maxF[0] - abs(x))
+
+        o = abs(y) if y < 0 else abs(self.__maxF[1] - abs(y))
+        u = abs(y) if y > 0 else abs(self.__maxF[1] - abs(y))
+
+        gewichte = [("links",l),("rechts",r),("oben",o),("unten",u)]
+        g = [gewichte[i][1] for i in range(len(gewichte))]
+
+        for j,k in zip(range(3, -1, -1), range(4)):
+            for i in range(j+1):
+                if gewichte[i][1] == min(g):
+                    wunsch[k] = self.richtungen[gewichte[i][0]]
+                    del gewichte[i]
+                    del g[i]
+                    break
+
+        for n in range(3, -1, -1):
+            for i in wunsch:
+                tmp = True
+                for j in range(n, 0, -1):
+                    if not self.__testWeg(i,j):
+                        tmp = False
+                if tmp:
+                    self.__orientierung = i
+                    break
+            if tmp:
+                break
+
+    def __testWeg(self, richtung, n):
+        if richtung == self.richtungen["unten"]:
+            if self.__orientierung != self.richtungen["oben"]:
+                if self.__spielfeld[self.__pos[0]][(self.__pos[1]+n) % self.__maxF[1]] == 0:
+                    return True
+        elif richtung == self.richtungen["oben"]:
+            if self.__orientierung != self.richtungen["unten"]:
+                if self.__spielfeld[self.__pos[0]][(self.__pos[1]-n) % self.__maxF[1]] == 0:
+                    return True
+        elif richtung == self.richtungen["rechts"]:
+            if self.__orientierung != self.richtungen["links"]:
+                if self.__spielfeld[(self.__pos[0]+n) % self.__maxF[0]][self.__pos[1]] == 0:
+                    return True
+        elif richtung == self.richtungen["links"]:
+            if self.__orientierung != self.richtungen["rechts"]:
+                if self.__spielfeld[(self.__pos[0]-n) % self.__maxF[0]][self.__pos[1]] == 0:
+                    return True
+        return False

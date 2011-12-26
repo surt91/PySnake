@@ -66,7 +66,7 @@ class ShowHighscore(QtGui.QDialog):
 
 # TODO: Default namen unter Windows testen
 class SetHighscore(QtGui.QDialog):
-    def __init__(self, punkte, level, size):
+    def __init__(self, punkte, level, size, name):
         super().__init__()
 
         self.hsFileName = os.path.expanduser("~/.qtPySnake")
@@ -75,6 +75,7 @@ class SetHighscore(QtGui.QDialog):
         self.size = size
         self.punkte = punkte
         self.datum = self.__getDatum()
+        self.defaultName = name
 
         self.initUI()
 
@@ -83,7 +84,8 @@ class SetHighscore(QtGui.QDialog):
         self.setWindowIcon(QtGui.QIcon('highscore.png'))
 
         try:
-            newString = os.environ['USER']
+            #~ newString = os.environ['USER']
+            newString = self.defaultName
         except:
             newString = "Dein Name"
 
@@ -134,7 +136,8 @@ class SetHighscore(QtGui.QDialog):
                 newString += a
         if newString == "":
             try:
-                newString = os.environ['USER']
+                #~ newString = os.environ['USER']
+                newString = self.defaultName
             except:
                 newString = "default"
         return newString
