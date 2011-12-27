@@ -202,7 +202,7 @@ class Snake(QtGui.QWidget):
             try:
                 name = os.environ['USER']
             except:
-                newString = "Anon"
+                name = "Anon"
 
             self.pauseAnzeige.setText("Verloren!")
             if CheckHighscore.getPunkte() < self.__punkte\
