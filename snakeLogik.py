@@ -283,10 +283,10 @@ class Snake(QtGui.QWidget):
         gewichte = [("links",l),("rechts",r),("oben",o),("unten",u)]
         g = [gewichte[i][1] for i in range(len(gewichte))]
 
-        for j,k in zip(range(3, -1, -1), range(4)):
+        for j in range(3, -1, -1):
             for i in range(j+1):
                 if gewichte[i][1] == min(g):
-                    wunsch[k] = self.richtungen[gewichte[i][0]]
+                    wunsch[abs(j-3)] = self.richtungen[gewichte[i][0]]
                     del gewichte[i]
                     del g[i]
                     break
@@ -296,6 +296,8 @@ class Snake(QtGui.QWidget):
                 tmp = True
                 for j in range(n, 0, -1):
                     if not self.__testWeg(i,j):
+                        tmp = False
+                    if not self.__testGasse(i):
                         tmp = False
                 if tmp:
                     self.__orientierung = i
@@ -321,3 +323,43 @@ class Snake(QtGui.QWidget):
                 if self.__spielfeld[(self.__pos[0]-n) % self.__maxF[0]][self.__pos[1]] == 0:
                     return True
         return False
+
+    def __testGasse(self, richtung):
+        if richtung == self.richtungen["unten"]:
+            n = 1
+            while  self.__spielfeld[(self.__pos[0]+1) % self.__maxF[1]][(self.__pos[1]+n) % self.__maxF[1]] != 0 \
+               and self.__spielfeld[(self.__pos[0]-1) % self.__maxF[1]][(self.__pos[1]+n) % self.__maxF[1]] != 0:
+                if self.__spielfeld[self.__pos[0]][(self.__pos[1]+n) % self.__maxF[1]] != 0:
+                    return False
+                n += 1
+                if n>100:
+                    break
+        if richtung == self.richtungen["oben"]:
+            n = 1
+            while  self.__spielfeld[(self.__pos[0]+1) % self.__maxF[1]][(self.__pos[1]-n) % self.__maxF[1]] != 0 \
+               and self.__spielfeld[(self.__pos[0]-1) % self.__maxF[1]][(self.__pos[1]-n) % self.__maxF[1]] != 0:
+                if self.__spielfeld[self.__pos[0]][(self.__pos[1]-n) % self.__maxF[1]] != 0:
+                    return False
+                n += 1
+                if n>100:
+                    break
+        if richtung == self.richtungen["rechts"]:
+            n = 1
+            while  self.__spielfeld[(self.__pos[0]+n) % self.__maxF[1]][(self.__pos[1]+1) % self.__maxF[1]] != 0 \
+               and self.__spielfeld[(self.__pos[0]+n) % self.__maxF[1]][(self.__pos[1]-1) % self.__maxF[1]] != 0:
+                if self.__spielfeld[(self.__pos[0]+n) % self.__maxF[0]][self.__pos[1]] != 0:
+                    return False
+                n += 1
+                if n>100:
+                    break
+        if richtung == self.richtungen["links"]:
+            n = 1
+            while  self.__spielfeld[(self.__pos[0]-n) % self.__maxF[1]][(self.__pos[1]+1) % self.__maxF[1]] != 0 \
+               and self.__spielfeld[(self.__pos[0]-n) % self.__maxF[1]][(self.__pos[1]-1) % self.__maxF[1]] != 0:
+                if self.__spielfeld[(self.__pos[0]-n) % self.__maxF[0]][self.__pos[1]] != 0:
+                    return False
+                n += 1
+                if n>100:
+                    break
+        return True
+
