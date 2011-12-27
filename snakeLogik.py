@@ -110,7 +110,7 @@ class Snake(QtGui.QWidget):
                         self.__spielfeld[i][j] -= 1
 
             if self.__pAutopilot:
-                self.autopilot()
+                self.__orientierung = self.autopilot()
 
             if self.__orientierung == self.richtungen["oben"]:
                 self.__pos[1] -= 1
@@ -300,10 +300,7 @@ class Snake(QtGui.QWidget):
                     if not self.__testGasse(i):
                         tmp = False
                 if tmp:
-                    self.__orientierung = i
-                    break
-            if tmp:
-                break
+                    return i
 
     def __testWeg(self, richtung, n):
         if richtung == self.richtungen["unten"]:
@@ -362,4 +359,3 @@ class Snake(QtGui.QWidget):
                 if n>100:
                     break
         return True
-
