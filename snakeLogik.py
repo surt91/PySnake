@@ -220,22 +220,22 @@ class Snake(QtGui.QWidget):
         if event.key() == QtCore.Qt.Key_P:
             self.togglePause()
         if not self.__block:
-            if event.key() == QtCore.Qt.Key_W:
+            if event.key() == QtCore.Qt.Key_W or event.key() == QtCore.Qt.Key_Up:
                 if self.__orientierung != self.richtungen["unten"]:
                     self.__orientierung = self.richtungen["oben"]
                     self.__block = True
                     self.setPause(False)
-            elif event.key() == QtCore.Qt.Key_S:
+            elif event.key() == QtCore.Qt.Key_S or event.key() == QtCore.Qt.Key_Down:
                 if self.__orientierung != self.richtungen["oben"]:
                     self.__orientierung = self.richtungen["unten"]
                     self.__block = True
                     self.setPause(False)
-            elif event.key() == QtCore.Qt.Key_A:
+            elif event.key() == QtCore.Qt.Key_A or event.key() == QtCore.Qt.Key_Left:
                 if self.__orientierung != self.richtungen["rechts"]:
                     self.__orientierung = self.richtungen["links"]
                     self.__block = True
                     self.setPause(False)
-            elif event.key() == QtCore.Qt.Key_D:
+            elif event.key() == QtCore.Qt.Key_D or event.key() == QtCore.Qt.Key_Right:
                 if self.__orientierung != self.richtungen["links"]:
                     self.__orientierung = self.richtungen["rechts"]
                     self.__block = True
