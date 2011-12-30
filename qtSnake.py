@@ -10,6 +10,9 @@ from zahlSelektor import *
 from highscore import *
 
 # TODO: Menüpuznkt wieviel Futter erzeugt werden soll
+# TODO: Anzeige benötigte Zeit (über schritte)
+# TODO: Anzeige Länge
+
 class SnakeWindow(QtGui.QMainWindow):
     def __init__(self):
         super().__init__()
@@ -71,9 +74,16 @@ class SnakeWindow(QtGui.QMainWindow):
         iconAutopilot = QtGui.QIcon('autopilot.png')
         autopilotKonservativAction = QtGui.QAction(iconAutopilot, '&Konservativ', self)
         #~ autopilotKonservativAction.setShortcut('Ctrl+A')
-        autopilotKonservativAction.setStatusTip('Konservative KI')
+        autopilotKonservativAction.setStatusTip('Konservative KI, perfektes, langsames Spiel')
         autopilotKonservativAction.setCheckable(True)
         autopilotKonservativAction.triggered.connect(self.setAutoKonservativ)
+
+        iconAutopilot = QtGui.QIcon('autopilot.png')
+        autopilotTreppeAction = QtGui.QAction(iconAutopilot, '&Treppe', self)
+        #~ autopilotTreppeAction.setShortcut('Ctrl+A')
+        autopilotTreppeAction.setStatusTip('Treppefreudige KI')
+        autopilotTreppeAction.setCheckable(True)
+        autopilotTreppeAction.triggered.connect(self.setAutoTreppe)
 
         iconAutopilot = QtGui.QIcon('autopilot.png')
         autopilotRisikoAction = QtGui.QAction(iconAutopilot, '&Risiko', self)
@@ -86,6 +96,7 @@ class SnakeWindow(QtGui.QMainWindow):
         autopilotRisikoAction.setChecked(True)
         autoKI.addAction(autopilotRisikoAction)
         autoKI.addAction(autopilotKonservativAction)
+        autoKI.addAction(autopilotTreppeAction)
 
         iconExit = QtGui.QIcon('exit.png')
         exitAction = QtGui.QAction(iconExit, '&Exit', self)
@@ -110,6 +121,7 @@ class SnakeWindow(QtGui.QMainWindow):
         menuAut.addSeparator()
         menuAut.addAction(autopilotRisikoAction)
         menuAut.addAction(autopilotKonservativAction)
+        menuAut.addAction(autopilotTreppeAction)
 
         self.setMenuBar(menubar)
 
@@ -149,6 +161,9 @@ class SnakeWindow(QtGui.QMainWindow):
 
     def setAutoKonservativ(self):
         self.anzeige.setAutoKonservativ()
+
+    def setAutoTreppe(self):
+        self.anzeige.setAutoTreppe()
 
 def main():
     app = QtGui.QApplication(sys.argv)

@@ -18,7 +18,8 @@ class Snake(QtGui.QWidget):
                "schlange" : QtGui.QColor(  0, 255,   0) }
 
     KIs = { "risiko"      : 1,
-            "konservativ" : 2}
+            "konservativ" : 2,
+            "treppe"      : 3}
 
     def __init__(self):
         super().__init__()
@@ -273,6 +274,10 @@ class Snake(QtGui.QWidget):
         self.__autoTyp = self.KIs["konservativ"]
         self.autopilotChanged()
 
+    def setAutoTreppe(self):
+        self.__autoTyp = self.KIs["treppe"]
+        self.autopilotChanged()
+
     def toggleAutopilot(self):
         if self.__pAutopilot:
             self.__pAutopilot = False
@@ -286,6 +291,8 @@ class Snake(QtGui.QWidget):
             self.autopilot = self.autoRisiko
         elif self.__autoTyp == self.KIs["konservativ"]:
             self.autopilot = self.autoKonservativ
+        elif self.__autoTyp == self.KIs["treppe"]:
+            self.autopilot = self.autoTreppe
         else:
              self.autopilot = self.autoRisiko
 
@@ -401,7 +408,7 @@ class Snake(QtGui.QWidget):
             o = abs(y) if y < 0 else abs(m - abs(y))
             u = abs(y) if y > 0 else abs(m - abs(y))
 
-            gewichte = [("links",l),("rechts",r),("oben",o),("unten",u)]
+            gewichte = [("rechts",l),("rechts",r),("oben",o),("unten",u)]
             g = [gewichte[i][1] for i in range(len(gewichte))]
 
             for j in range(3, -1, -1):
@@ -413,11 +420,47 @@ class Snake(QtGui.QWidget):
                         break
         else:
             self.__schritte -= 1
-            wunsch = [1,2,3,4]
+            wunsch = [self.richtungen["oben"],self.richtungen["rechts"],\
+                      self.richtungen["links"],self.richtungen["unten"]]
 
-        for n in range(3, -1, -1):
+        for n in range(1, -1, -1):
             for i in wunsch:
                 tmp = True
-                if self.__testWeg(i,1):
+                for j in range(n, 0, -1):
+                    if not self.__testWeg(i,j):
+                        tmp = False
+                    if not self.__testGasse(i):
+                        tmp = False
+                if tmp:
                     return i
         return self.__orientierung
+
+
+    def autoTreppe(self):
+        wunsch = [0,0,0,0]
+
+        if self.__tmpLength != self.__length:
+            self.__tmpLength = self.__length
+            self.__schritte = self.__length
+
+        x = self.__futter[0] - self.__pos[0]
+        y = self.__futter[1] - self.__pos[1]
+        m = max(self.__maxF[0],self.__maxF[1])
+
+        h = min(abs(x),abs(m - abs(x)))
+
+        v = min(abs(y),abs(m - abs(y)))
+
+        if h>v:
+            wunsch = [self.richtungen["rechts"], self.richtungen["unten"]]
+        else:
+            wunsch = [self.richtungen["unten"], self.richtungen["rechts"]]
+
+        for i in wunsch:
+            if self.__testWeg(i,1):
+                return i
+        for i in [1,2,3,4]:
+            if self.__testWeg(i,1):
+                return i
+        return self.__orientierung
+
