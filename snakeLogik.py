@@ -266,6 +266,8 @@ class Snake(QtGui.QWidget):
     def getColor(self):
         return self.farben
 
+    # Autopilot Teil:
+
     def setAutoRisiko(self):
         self.__autoTyp = self.KIs["risiko"]
         self.autopilotChanged()
@@ -295,42 +297,6 @@ class Snake(QtGui.QWidget):
             self.autopilot = self.autoTreppe
         else:
              self.autopilot = self.autoRisiko
-
-    def autoRisiko(self):
-        wunsch = [0,0,0,0]
-
-        x = self.__futter[0] - self.__pos[0]
-        y = self.__futter[1] - self.__pos[1]
-        m = max(self.__maxF[0],self.__maxF[1])
-
-        l = abs(x) if x < 0 else abs(m - abs(x))
-        r = abs(x) if x > 0 else abs(m - abs(x))
-
-        o = abs(y) if y < 0 else abs(m - abs(y))
-        u = abs(y) if y > 0 else abs(m - abs(y))
-
-        gewichte = [("links",l),("rechts",r),("oben",o),("unten",u)]
-        g = [gewichte[i][1] for i in range(len(gewichte))]
-
-        for j in range(3, -1, -1):
-            for i in range(j+1):
-                if gewichte[i][1] == min(g):
-                    wunsch[abs(j-3)] = self.richtungen[gewichte[i][0]]
-                    del gewichte[i]
-                    del g[i]
-                    break
-
-        for n in range(3, -1, -1):
-            for i in wunsch:
-                tmp = True
-                for j in range(n, 0, -1):
-                    if not self.__testWeg(i,j):
-                        tmp = False
-                    if not self.__testGasse(i):
-                        tmp = False
-                if tmp:
-                    return i
-        return self.__orientierung
 
     def __testWeg(self, richtung, n):
         if richtung == self.richtungen["unten"]:
@@ -389,6 +355,42 @@ class Snake(QtGui.QWidget):
                 if n>100:
                     break
         return True
+
+def autoRisiko(self):
+        wunsch = [0,0,0,0]
+
+        x = self.__futter[0] - self.__pos[0]
+        y = self.__futter[1] - self.__pos[1]
+        m = max(self.__maxF[0],self.__maxF[1])
+
+        l = abs(x) if x < 0 else abs(m - abs(x))
+        r = abs(x) if x > 0 else abs(m - abs(x))
+
+        o = abs(y) if y < 0 else abs(m - abs(y))
+        u = abs(y) if y > 0 else abs(m - abs(y))
+
+        gewichte = [("links",l),("rechts",r),("oben",o),("unten",u)]
+        g = [gewichte[i][1] for i in range(len(gewichte))]
+
+        for j in range(3, -1, -1):
+            for i in range(j+1):
+                if gewichte[i][1] == min(g):
+                    wunsch[abs(j-3)] = self.richtungen[gewichte[i][0]]
+                    del gewichte[i]
+                    del g[i]
+                    break
+
+        for n in range(3, -1, -1):
+            for i in wunsch:
+                tmp = True
+                for j in range(n, 0, -1):
+                    if not self.__testWeg(i,j):
+                        tmp = False
+                    if not self.__testGasse(i):
+                        tmp = False
+                if tmp:
+                    return i
+        return self.__orientierung
 
     def autoKonservativ(self):
         wunsch = [0,0,0,0]
