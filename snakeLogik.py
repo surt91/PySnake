@@ -17,10 +17,14 @@ class Snake(QtGui.QWidget):
                "futter"   : QtGui.QColor(255,   0,   0),
                "schlange" : QtGui.QColor(  0, 255,   0) }
 
+    KIs = { "risiko"      : 1,
+            "konservativ" : 2}
+
     def __init__(self):
         super().__init__()
         self.__punkte = 0
         self.__pAutopilot = False
+        self.__autoTyp = self.KIs["risiko"]
         self.__maxF = (20, 20)
 
         self.initUI()
@@ -71,6 +75,7 @@ class Snake(QtGui.QWidget):
     def neustart(self):
         if self.__pAutopilot:
             self.setPause(False)
+            self.__tmpLength = 0
         else:
             self.setPause(True)
 
@@ -260,14 +265,31 @@ class Snake(QtGui.QWidget):
     def getColor(self):
         return self.farben
 
+    def setAutoRisiko(self):
+        self.__autoTyp = self.KIs["risiko"]
+        self.autopilotChanged()
+
+    def setAutoKonservativ(self):
+        self.__autoTyp = self.KIs["konservativ"]
+        self.autopilotChanged()
+
     def toggleAutopilot(self):
         if self.__pAutopilot:
             self.__pAutopilot = False
         else:
             self.__pAutopilot = True
+        self.autopilotChanged()
         self.neustart()
 
-    def autopilot(self):
+    def autopilotChanged(self):
+        if self.__autoTyp == self.KIs["risiko"]:
+            self.autopilot = self.autoRisiko
+        elif self.__autoTyp == self.KIs["konservativ"]:
+            self.autopilot = self.autoKonservativ
+        else:
+             self.autopilot = self.autoRisiko
+
+    def autoRisiko(self):
         wunsch = [0,0,0,0]
 
         x = self.__futter[0] - self.__pos[0]
@@ -301,6 +323,7 @@ class Snake(QtGui.QWidget):
                         tmp = False
                 if tmp:
                     return i
+        return self.__orientierung
 
     def __testWeg(self, richtung, n):
         if richtung == self.richtungen["unten"]:
@@ -359,3 +382,42 @@ class Snake(QtGui.QWidget):
                 if n>100:
                     break
         return True
+
+    def autoKonservativ(self):
+        wunsch = [0,0,0,0]
+
+        if self.__tmpLength != self.__length:
+            self.__tmpLength = self.__length
+            self.__schritte = self.__length
+
+        if self.__schritte == 0:
+            x = self.__futter[0] - self.__pos[0]
+            y = self.__futter[1] - self.__pos[1]
+            m = max(self.__maxF[0],self.__maxF[1])
+
+            l = abs(x) if x < 0 else abs(m - abs(x))
+            r = abs(x) if x > 0 else abs(m - abs(x))
+
+            o = abs(y) if y < 0 else abs(m - abs(y))
+            u = abs(y) if y > 0 else abs(m - abs(y))
+
+            gewichte = [("links",l),("rechts",r),("oben",o),("unten",u)]
+            g = [gewichte[i][1] for i in range(len(gewichte))]
+
+            for j in range(3, -1, -1):
+                for i in range(j+1):
+                    if gewichte[i][1] == min(g):
+                        wunsch[abs(j-3)] = self.richtungen[gewichte[i][0]]
+                        del gewichte[i]
+                        del g[i]
+                        break
+        else:
+            self.__schritte -= 1
+            wunsch = [1,2,3,4]
+
+        for n in range(3, -1, -1):
+            for i in wunsch:
+                tmp = True
+                if self.__testWeg(i,1):
+                    return i
+        return self.__orientierung

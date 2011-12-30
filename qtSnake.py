@@ -68,6 +68,25 @@ class SnakeWindow(QtGui.QMainWindow):
         autopilotAction.setCheckable(True)
         autopilotAction.triggered.connect(self.toggleAutopilot)
 
+        iconAutopilot = QtGui.QIcon('autopilot.png')
+        autopilotKonservativAction = QtGui.QAction(iconAutopilot, '&Konservativ', self)
+        #~ autopilotKonservativAction.setShortcut('Ctrl+A')
+        autopilotKonservativAction.setStatusTip('Konservative KI')
+        autopilotKonservativAction.setCheckable(True)
+        autopilotKonservativAction.triggered.connect(self.setAutoKonservativ)
+
+        iconAutopilot = QtGui.QIcon('autopilot.png')
+        autopilotRisikoAction = QtGui.QAction(iconAutopilot, '&Risiko', self)
+        #~ autopilotRisikoAction.setShortcut('Ctrl+A')
+        autopilotRisikoAction.setStatusTip('Risikofreudige KI')
+        autopilotRisikoAction.setCheckable(True)
+        autopilotRisikoAction.triggered.connect(self.setAutoRisiko)
+
+        autoKI = QtGui.QActionGroup(self)
+        autopilotRisikoAction.setChecked(True)
+        autoKI.addAction(autopilotRisikoAction)
+        autoKI.addAction(autopilotKonservativAction)
+
         iconExit = QtGui.QIcon('exit.png')
         exitAction = QtGui.QAction(iconExit, '&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -77,15 +96,20 @@ class SnakeWindow(QtGui.QMainWindow):
         menubar = QtGui.QMenuBar(self)
         menuFkt = menubar.addMenu('Funktion')
         menuDar = menubar.addMenu('Darstellung')
+        menuAut = menubar.addMenu('Autopilot')
 
         menuFkt.addAction(neustartAction)
         menuFkt.addAction(levelAction)
         menuFkt.addAction(sizeAction)
         menuFkt.addAction(showHighscoreAction)
-        menuFkt.addAction(autopilotAction)
         menuFkt.addAction(exitAction)
 
         menuDar.addAction(setColorAction)
+
+        menuAut.addAction(autopilotAction)
+        menuAut.addSeparator()
+        menuAut.addAction(autopilotRisikoAction)
+        menuAut.addAction(autopilotKonservativAction)
 
         self.setMenuBar(menubar)
 
@@ -119,6 +143,12 @@ class SnakeWindow(QtGui.QMainWindow):
 
     def toggleAutopilot(self):
         self.anzeige.toggleAutopilot()
+
+    def setAutoRisiko(self):
+        self.anzeige.setAutoRisiko()
+
+    def setAutoKonservativ(self):
+        self.anzeige.setAutoKonservativ()
 
 def main():
     app = QtGui.QApplication(sys.argv)
