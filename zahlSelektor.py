@@ -12,7 +12,7 @@ class ZahlSelektor(QtGui.QDialog):
     def initUI(self, default):
         lcd = QtGui.QLCDNumber(self)
         sld = QtGui.QSlider(QtCore.Qt.Horizontal, self)
-        sld.setRange(1,10)
+        sld.setRange(1,15)
         sld.setTracking(True)
 
         sld.setValue(default)
