@@ -1,7 +1,7 @@
 Zum Spielen starte "qtSnake.py".
 
 Abhängigkeiten:
-    python 3
-    pyqt 4
+    python3 (http://www.python.org/download/)
+    pyqt 4  (http://www.riverbankcomputing.co.uk/software/pyqt/download)
 
 Highscores werden in ~./qtPySnake gespeichert.
