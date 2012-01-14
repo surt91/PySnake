@@ -392,77 +392,77 @@ class Snake(QtGui.QWidget):
                         return i
             return self.__orientierung
 
-    def autoKonservativ(self):
-        wunsch = [0,0,0,0]
+def autoKonservativ(self):
+    wunsch = [0,0,0,0]
 
-        if self.__tmpLength != self.__length:
-            self.__tmpLength = self.__length
-            self.__schritte = self.__length
+    if self.__tmpLength != self.__length:
+        self.__tmpLength = self.__length
+        self.__schritte = self.__length
 
-        if self.__schritte == 0:
-            x = self.__futter[0] - self.__pos[0]
-            y = self.__futter[1] - self.__pos[1]
-            m = max(self.__maxF[0],self.__maxF[1])
-
-            l = abs(x) if x < 0 else abs(m - abs(x))
-            r = abs(x) if x > 0 else abs(m - abs(x))
-
-            o = abs(y) if y < 0 else abs(m - abs(y))
-            u = abs(y) if y > 0 else abs(m - abs(y))
-
-            gewichte = [("rechts",l),("rechts",r),("oben",o),("unten",u)]
-            g = [gewichte[i][1] for i in range(len(gewichte))]
-
-            for j in range(3, -1, -1):
-                for i in range(j+1):
-                    if gewichte[i][1] == min(g):
-                        wunsch[abs(j-3)] = self.richtungen[gewichte[i][0]]
-                        del gewichte[i]
-                        del g[i]
-                        break
-        else:
-            self.__schritte -= 1
-            wunsch = [self.richtungen["oben"],self.richtungen["rechts"],\
-                      self.richtungen["links"],self.richtungen["unten"]]
-
-        for n in range(1, -1, -1):
-            for i in wunsch:
-                tmp = True
-                for j in range(n, 0, -1):
-                    if not self.__testWeg(i,j):
-                        tmp = False
-                    if not self.__testGasse(i):
-                        tmp = False
-                if tmp:
-                    return i
-        return self.__orientierung
-
-
-    def autoTreppe(self):
-        wunsch = [0,0,0,0]
-
-        if self.__tmpLength != self.__length:
-            self.__tmpLength = self.__length
-            self.__schritte = self.__length
-
+    if self.__schritte == 0:
         x = self.__futter[0] - self.__pos[0]
         y = self.__futter[1] - self.__pos[1]
         m = max(self.__maxF[0],self.__maxF[1])
 
-        h = min(abs(x),abs(m - abs(x)))
+        l = abs(x) if x < 0 else abs(m - abs(x))
+        r = abs(x) if x > 0 else abs(m - abs(x))
 
-        v = min(abs(y),abs(m - abs(y)))
+        o = abs(y) if y < 0 else abs(m - abs(y))
+        u = abs(y) if y > 0 else abs(m - abs(y))
 
-        if h>v:
-            wunsch = [self.richtungen["rechts"], self.richtungen["unten"]]
-        else:
-            wunsch = [self.richtungen["unten"], self.richtungen["rechts"]]
+        gewichte = [("rechts",l),("rechts",r),("oben",o),("unten",u)]
+        g = [gewichte[i][1] for i in range(len(gewichte))]
 
+        for j in range(3, -1, -1):
+            for i in range(j+1):
+                if gewichte[i][1] == min(g):
+                    wunsch[abs(j-3)] = self.richtungen[gewichte[i][0]]
+                    del gewichte[i]
+                    del g[i]
+                    break
+    else:
+        self.__schritte -= 1
+        wunsch = [self.richtungen["oben"],self.richtungen["rechts"],\
+                  self.richtungen["links"],self.richtungen["unten"]]
+
+    for n in range(1, -1, -1):
         for i in wunsch:
-            if self.__testWeg(i,1):
+            tmp = True
+            for j in range(n, 0, -1):
+                if not self.__testWeg(i,j):
+                    tmp = False
+                if not self.__testGasse(i):
+                    tmp = False
+            if tmp:
                 return i
-        for i in [1,2,3,4]:
-            if self.__testWeg(i,1):
-                return i
-        return self.__orientierung
+    return self.__orientierung
+
+
+def autoTreppe(self):
+    wunsch = [0,0,0,0]
+
+    if self.__tmpLength != self.__length:
+        self.__tmpLength = self.__length
+        self.__schritte = self.__length
+
+    x = self.__futter[0] - self.__pos[0]
+    y = self.__futter[1] - self.__pos[1]
+    m = max(self.__maxF[0],self.__maxF[1])
+
+    h = min(abs(x),abs(m - abs(x)))
+
+    v = min(abs(y),abs(m - abs(y)))
+
+    if h>v:
+        wunsch = [self.richtungen["rechts"], self.richtungen["unten"]]
+    else:
+        wunsch = [self.richtungen["unten"], self.richtungen["rechts"]]
+
+    for i in wunsch:
+        if self.__testWeg(i,1):
+            return i
+    for i in [1,2,3,4]:
+        if self.__testWeg(i,1):
+            return i
+    return self.__orientierung
 
