@@ -43,6 +43,7 @@ class ZahlSelektor(QtGui.QDialog):
         self.setLayout(hbox)
 
         self.setWindowTitle('Level Auswahl')
+        self.setWindowIcon(QtGui.QIcon('icons/level.png'))
 
     def __setVal(self, x):
         self.__wert = x

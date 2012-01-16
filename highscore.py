@@ -18,7 +18,7 @@ class ShowHighscore(QtGui.QDialog):
         liste = []
 
         self.setWindowTitle('Highscores')
-        self.setWindowIcon(QtGui.QIcon('highscore.png'))
+        self.setWindowIcon(QtGui.QIcon('icons/highscore.png'))
 
         btn = QtGui.QPushButton('&Schließen!', self)
         btn.clicked.connect(self.close)
@@ -81,7 +81,7 @@ class SetHighscore(QtGui.QDialog):
 
     def initUI(self):
         self.setWindowTitle('Highscores')
-        self.setWindowIcon(QtGui.QIcon('highscore.png'))
+        self.setWindowIcon(QtGui.QIcon('icons/highscore.png'))
 
         try:
             #~ newString = os.environ['USER']

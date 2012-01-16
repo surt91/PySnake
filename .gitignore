@@ -1,1 +1,7 @@
 __pycache__/
+
+/pkg
+/src
+PKGBUILD
+*.pkg.tar.xz
+pysnake.sh

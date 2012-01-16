@@ -63,6 +63,7 @@ class ColorSelektor(QtGui.QDialog):
         self.setLayout(hbox)
 
         self.setWindowTitle('Farb Auswahl')
+        self.setWindowIcon(QtGui.QIcon('icons/color.png'))
 
     def makeIcon(self, color, button):
         x = QtGui.QPixmap(100,100)
